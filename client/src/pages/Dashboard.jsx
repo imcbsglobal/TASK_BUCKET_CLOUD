@@ -96,16 +96,16 @@ const Dashboard = () => {
         message={message.text} 
         onClose={() => setMessage({ type: '', text: '' })}
       />
-      <div className="mx-auto max-w-4xl">
-        <div className="flex flex-wrap justify-between gap-3 mb-8">
-          <h1 className="gradient-text text-4xl font-black leading-tight tracking-[-0.033em]">
+      <div className="mx-auto max-w-4xl mt-12 md:mt-0">
+        <div className="flex flex-wrap justify-between gap-3 mb-6 sm:mb-8">
+          <h1 className="gradient-text text-2xl sm:text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">
             Image Management Dashboard
           </h1>
         </div>
 
     
-        <div className="bg-card rounded-xl border border-purple-neon/30 neon-glow p-6">
-          <h2 className="text-text-primary text-[22px] font-bold leading-tight tracking-[-0.015em] pb-5">
+        <div className="bg-card rounded-xl border border-purple-neon/30 neon-glow p-4 sm:p-6">
+          <h2 className="text-text-primary text-lg sm:text-[22px] font-bold leading-tight tracking-[-0.015em] pb-4 sm:pb-5">
             Upload a New Image
           </h2>
           
@@ -152,25 +152,25 @@ const Dashboard = () => {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-4">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 px-2 sm:px-4">
             <label className="flex flex-col">
-              <p className="text-text-primary text-base font-medium leading-normal pb-2">
+              <p className="text-text-primary text-sm sm:text-base font-medium leading-normal pb-2">
                 Name (Optional)
               </p>
               <input
-                className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-purple-neon/30 bg-background h-12 placeholder:text-text-secondary p-3 text-base font-normal leading-normal"
+                className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-purple-neon/30 bg-background h-11 sm:h-12 placeholder:text-text-secondary p-3 text-sm sm:text-base font-normal leading-normal"
                 placeholder="Enter a custom name"
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
               />
             </label>
             
-            <label className="flex flex-col md:col-span-2">
-              <p className="text-text-primary text-base font-medium leading-normal pb-2">
+            <label className="flex flex-col">
+              <p className="text-text-primary text-sm sm:text-base font-medium leading-normal pb-2">
                 Description (Optional)
               </p>
               <textarea
-                className="form-textarea flex w-full min-w-0 flex-1 resize-y overflow-hidden rounded-lg text-text-primary focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-purple-neon/30 bg-background h-24 placeholder:text-text-secondary p-3 text-base font-normal leading-normal"
+                className="form-textarea flex w-full min-w-0 flex-1 resize-y overflow-hidden rounded-lg text-text-primary focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-purple-neon/30 bg-background h-20 sm:h-24 placeholder:text-text-secondary p-3 text-sm sm:text-base font-normal leading-normal"
                 placeholder="Add a short description..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -189,59 +189,66 @@ const Dashboard = () => {
           </div>
         </div>
     <div className="mb-10">
-          <h2 className="text-text-primary text-[22px] font-bold leading-tight tracking-[-0.015em] mb-4 mt-10">
+          <h2 className="text-text-primary text-lg sm:text-[22px] font-bold leading-tight tracking-[-0.015em] mb-4 mt-8 sm:mt-10">
             Recent Uploads
           </h2>
-          <div className="overflow-x-auto bg-card rounded-xl border border-purple-neon/30 neon-glow">
+          <div className="bg-card rounded-xl border border-purple-neon/30 neon-glow">
             {loading ? (
-              <div className="p-8 text-center text-text-secondary">Loading...</div>
+              <div className="p-6 sm:p-8 text-center text-text-secondary">Loading...</div>
             ) : images.length === 0 ? (
-              <div className="p-8 text-center text-text-secondary">No images uploaded yet</div>
+              <div className="p-6 sm:p-8 text-center text-text-secondary">No images uploaded yet</div>
             ) : (
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-text-secondary uppercase bg-background/50">
-                  <tr>
-                    <th className="px-6 py-3 w-24" scope="col">Preview</th>
-                    <th className="px-6 py-3" scope="col">Name</th>
-                    <th className="px-6 py-3" scope="col">Description</th>
-                    <th className="px-6 py-3" scope="col">Size</th>
-                    <th className="px-6 py-3" scope="col">Date</th>
-                    <th className="px-6 py-3 text-right" scope="col">URL</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {images.slice(0, 5).map((image) => (
-                    <tr key={image.id} className="border-b border-purple-neon/20 hover:bg-primary/5 transition-colors">
-                      <td className="px-6 py-4">
-                        <div
-                          className="bg-center bg-no-repeat aspect-square bg-cover rounded-md h-12 w-12 border border-purple-neon/30"
-                          style={{ backgroundImage: `url("${image.url}")` }}
-                        />
-                      </td>
-                      <td className="px-6 py-4 font-medium text-text-primary">
-                        {image.name || image.original_filename}
-                      </td>
-                      <td className="px-6 py-4 text-text-secondary">
-                        {image.description || '-'}
-                      </td>
-                      <td className="px-6 py-4 text-text-secondary">
-                        {formatSize(image.size)}
-                      </td>
-                      <td className="px-6 py-4 text-text-secondary">
-                        {formatDate(image.uploaded_at)}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => copyToClipboard(image.url)}
-                          className="inline-flex items-center justify-center p-2 rounded-lg hover:bg-primary/20 text-primary transition-all"
-                        >
-                          <MdContentCopy className="text-xl" />
-                        </button>
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-xs text-text-secondary uppercase bg-background/50">
+                    <tr>
+                      <th className="px-3 sm:px-6 py-3 w-16 sm:w-24" scope="col">Preview</th>
+                      <th className="px-3 sm:px-6 py-3" scope="col">Name</th>
+                      <th className="px-3 sm:px-6 py-3 hidden md:table-cell" scope="col">Description</th>
+                      <th className="px-3 sm:px-6 py-3 hidden sm:table-cell" scope="col">Size</th>
+                      <th className="px-3 sm:px-6 py-3 hidden lg:table-cell" scope="col">Date</th>
+                      <th className="px-3 sm:px-6 py-3 text-right" scope="col">URL</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {images.slice(0, 5).map((image) => (
+                      <tr key={image.id} className="border-b border-purple-neon/20 hover:bg-primary/5 transition-colors">
+                        <td className="px-3 sm:px-6 py-4">
+                          <div
+                            className="bg-center bg-no-repeat aspect-square bg-cover rounded-md h-10 w-10 sm:h-12 sm:w-12 border border-purple-neon/30"
+                            style={{ backgroundImage: `url("${image.url}")` }}
+                          />
+                        </td>
+                        <td className="px-3 sm:px-6 py-4 font-medium text-text-primary text-xs sm:text-sm">
+                          <div className="max-w-[120px] sm:max-w-none truncate">
+                            {image.name || image.original_filename}
+                          </div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-4 text-text-secondary hidden md:table-cell">
+                          <div className="max-w-[200px] truncate">
+                            {image.description || '-'}
+                          </div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-4 text-text-secondary text-xs sm:text-sm hidden sm:table-cell">
+                          {formatSize(image.size)}
+                        </td>
+                        <td className="px-3 sm:px-6 py-4 text-text-secondary text-xs sm:text-sm hidden lg:table-cell">
+                          {formatDate(image.uploaded_at)}
+                        </td>
+                        <td className="px-3 sm:px-6 py-4 text-right">
+                          <button
+                            onClick={() => copyToClipboard(image.url)}
+                            className="inline-flex items-center justify-center p-1.5 sm:p-2 rounded-lg hover:bg-primary/20 text-primary transition-all"
+                            title="Copy URL"
+                          >
+                            <MdContentCopy className="text-lg sm:text-xl" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </div>

@@ -1,8 +1,8 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { MdHistory, MdPhotoLibrary, MdLogout, MdUpload } from 'react-icons/md';
+import { MdHistory, MdPhotoLibrary, MdLogout, MdUpload, MdClose } from 'react-icons/md';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -10,6 +10,7 @@ const Sidebar = () => {
   const handleLogout = () => {
     logout();
     navigate('/login');
+    onClose?.();
   };
 
   const handleNewUpload = () => {
@@ -19,15 +20,41 @@ const Sidebar = () => {
     } else {
       navigate('/dashboard');
     }
+    onClose?.();
+  };
+
+  const handleNavClick = () => {
+    onClose?.();
   };
 
   const isActive = (path) => location.pathname === path;
 
   return (
-    <aside className="w-64 flex-shrink-0 bg-card border-r border-purple-neon/20 p-4 h-screen fixed left-0 top-0 overflow-y-hidden">
-      <div className="flex h-full flex-col justify-between">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-3">
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
+          onClick={onClose}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <aside className={`w-64 flex-shrink-0 bg-card border-r border-purple-neon/20 p-4 h-screen fixed left-0 top-0 overflow-y-auto z-50 transition-transform duration-300 ${
+        isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      }`}>
+        {/* Close button for mobile */}
+        <button
+          onClick={onClose}
+          className="md:hidden absolute top-4 right-4 p-2 rounded-lg hover:bg-purple-neon/10 text-text-secondary hover:text-primary transition-all"
+          aria-label="Close menu"
+        >
+          <MdClose className="text-2xl" />
+        </button>
+        
+        <div className="flex h-full flex-col justify-between">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
             <div 
               className="bg-gradient-to-br from-yellow-neon to-purple-neon rounded-full size-10 flex items-center justify-center neon-glow"
             >
@@ -41,7 +68,8 @@ const Sidebar = () => {
           
           <nav className="flex flex-col gap-2 mt-4">
             <Link 
-              to="/dashboard" 
+              to="/dashboard"
+              onClick={handleNavClick}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
                 isActive('/dashboard') 
                   ? 'bg-primary/20 text-primary neon-glow'
@@ -55,7 +83,8 @@ const Sidebar = () => {
             </Link>
             
             <Link 
-              to="/gallery" 
+              to="/gallery"
+              onClick={handleNavClick}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
                 isActive('/gallery')
                   ? 'bg-primary/20 text-primary neon-glow'
@@ -89,6 +118,7 @@ const Sidebar = () => {
         </div>
       </div>
     </aside>
+    </>
   );
 };
 

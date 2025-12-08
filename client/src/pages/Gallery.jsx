@@ -83,17 +83,17 @@ const Gallery = () => {
         confirmText="Delete"
         cancelText="Cancel"
       />
-      <div className="mx-auto max-w-7xl">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <h1 className="gradient-text text-4xl font-black leading-tight tracking-[-0.033em]">
+      <div className="mx-auto max-w-7xl mt-12 md:mt-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <h1 className="gradient-text text-2xl sm:text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">
             Image Gallery
           </h1>
           
-          <div className="flex items-center gap-4">
-            <div className="relative w-full md:w-64">
-              <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-2xl" />
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <div className="relative w-full sm:w-64">
+              <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-xl sm:text-2xl" />
               <input
-                className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-purple-neon/30 bg-card h-11 placeholder:text-text-secondary p-3 text-base font-normal leading-normal pl-11"
+                className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-purple-neon/30 bg-card h-10 sm:h-11 placeholder:text-text-secondary p-3 text-sm sm:text-base font-normal leading-normal pl-10 sm:pl-11"
                 placeholder="Search images..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -111,7 +111,7 @@ const Gallery = () => {
             {searchQuery ? 'No images found matching your search' : 'No images uploaded yet'}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
             {filteredImages.map((image) => (
               <div
                 key={image.id}
@@ -123,55 +123,55 @@ const Gallery = () => {
                   style={{ backgroundImage: `url("${image.url}")` }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent opacity-90"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <p className="text-text-primary text-sm font-medium leading-tight truncate">
+                <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-3 md:p-4">
+                  <p className="text-text-primary text-xs sm:text-sm font-medium leading-tight truncate">
                     {image.name || image.original_filename}
                   </p>
                   {image.description && (
-                    <p className="text-text-secondary text-xs mt-1 truncate">
+                    <p className="text-text-secondary text-[10px] sm:text-xs mt-1 truncate hidden sm:block">
                       {image.description}
                     </p>
                   )}
-                  <div className="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 sm:gap-2 mt-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate(`/image/${image.id}`);
                       }}
-                      className="inline-flex items-center justify-center p-2 rounded-lg bg-primary/30 hover:bg-primary text-white backdrop-blur-sm transition-all"
+                      className="inline-flex items-center justify-center p-1.5 sm:p-2 rounded-lg bg-primary/30 hover:bg-primary text-white backdrop-blur-sm transition-all"
                       title="View Details"
                     >
-                      <MdVisibility className="text-xl" />
+                      <MdVisibility className="text-base sm:text-xl" />
                     </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         window.open(image.url, '_blank');
                       }}
-                      className="inline-flex items-center justify-center p-2 rounded-lg bg-primary/30 hover:bg-primary text-white backdrop-blur-sm transition-all"
+                      className="hidden sm:inline-flex items-center justify-center p-1.5 sm:p-2 rounded-lg bg-primary/30 hover:bg-primary text-white backdrop-blur-sm transition-all"
                       title="Open in New Tab"
                     >
-                      <MdOpenInNew className="text-xl" />
+                      <MdOpenInNew className="text-base sm:text-xl" />
                     </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         copyToClipboard(image.url);
                       }}
-                      className="inline-flex items-center justify-center p-2 rounded-lg bg-primary/30 hover:bg-primary text-white backdrop-blur-sm transition-all"
+                      className="inline-flex items-center justify-center p-1.5 sm:p-2 rounded-lg bg-primary/30 hover:bg-primary text-white backdrop-blur-sm transition-all"
                       title="Copy URL"
                     >
-                      <MdContentCopy className="text-xl" />
+                      <MdContentCopy className="text-base sm:text-xl" />
                     </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteClick(image.id);
                       }}
-                      className="inline-flex items-center justify-center p-2 rounded-lg bg-red-500/30 hover:bg-red-500 text-white backdrop-blur-sm transition-all"
+                      className="inline-flex items-center justify-center p-1.5 sm:p-2 rounded-lg bg-red-500/30 hover:bg-red-500 text-white backdrop-blur-sm transition-all"
                       title="Delete Image"
                     >
-                      <MdDelete className="text-xl" />
+                      <MdDelete className="text-base sm:text-xl" />
                     </button>
                   </div>
                 </div>
