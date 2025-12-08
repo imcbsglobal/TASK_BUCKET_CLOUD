@@ -80,7 +80,7 @@ The API will be available at `http://127.0.0.1:8000/`
 
 **Request:**
 - Content-Type: `multipart/form-data`
-- Body: 
+- Body:
   - `image` (required): Image file
   - `name` (optional): Custom name for the image
   - `description` (optional): Description of the image
@@ -138,22 +138,6 @@ print(response.json())
 
 **Endpoint:** `GET /api/list/`
 
-**Example using curl:**
-
-```bash
-curl http://127.0.0.1:8000/api/list/
-```
-
-**Example using Python requests:**
-
-```python
-import requests
-
-url = "http://127.0.0.1:8000/api/list/"
-response = requests.get(url)
-print(response.json())
-```
-
 **Success Response (200):**
 
 ```json
@@ -184,6 +168,8 @@ print(response.json())
   ]
 }
 ```
+
+> **Note:** All image URLs returned by the API are public Cloudflare R2 URLs, not local `/media/` paths. Images are stored in your Cloudflare R2 bucket and served from there.
 
 ## Testing with Postman
 
