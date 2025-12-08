@@ -3,19 +3,32 @@
 @tailwind utilities;
 
 :root {
-  --gradient-start: #ff8d27;
-  --gradient-end: #d532a2;
-  --gradient-via: #ff495c;
+  --gradient-start: #C724F6;
+  --gradient-end: #E13CC9;
+  --border-gradient-start: #F2D14F;
+  --border-gradient-end: #9B4DFF;
+}
+
+body {
+  @apply bg-background text-text-primary;
 }
 
 .gradient-text {
-  @apply bg-gradient-to-r from-[var(--gradient-start)] via-[var(--gradient-via)] to-[var(--gradient-end)] bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] bg-clip-text text-transparent;
 }
 
 .gradient-bg {
-  background: linear-gradient(105deg, #007cf0, #00dfd8);
+  background: linear-gradient(135deg, #C724F6, #E13CC9);
 }
 
-.danger-bg {
-  background: linear-gradient(105deg, #f04400, #f08300);
+.gradient-border {
+  background: linear-gradient(135deg, #F2D14F, #9B4DFF);
+}
+
+.neon-glow {
+  box-shadow: 0 0 20px rgba(199, 36, 246, 0.5);
+}
+
+.neon-text {
+  text-shadow: 0 0 12px rgba(226, 60, 201, 0.7);
 }

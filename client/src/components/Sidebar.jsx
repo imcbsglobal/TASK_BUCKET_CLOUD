@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { MdHistory, MdPhotoLibrary, MdLogout, MdUpload } from 'react-icons/md';
 
 const Sidebar = () => {
   const location = useLocation();
@@ -11,69 +12,77 @@ const Sidebar = () => {
     navigate('/login');
   };
 
+  const handleNewUpload = () => {
+    if (location.pathname === '/dashboard') {
+      // Scroll to upload form
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
   const isActive = (path) => location.pathname === path;
 
   return (
-    <aside className="w-64 flex-shrink-0 bg-[#fbfcfc] dark:bg-[#111418] border-r border-slate-200 dark:border-slate-800 p-4 h-screen fixed left-0 top-0 overflow-y-hidden">
+    <aside className="w-64 flex-shrink-0 bg-card border-r border-purple-neon/20 p-4 h-screen fixed left-0 top-0 overflow-y-hidden">
       <div className="flex h-full flex-col justify-between">
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
             <div 
-              className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-              style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBUl-On-iWKZRycimaLnZEaEcIjc-TlJIF2ZjoDAtJKdvHoyXKUK_ocgDy5FJbPCgPq-0Mae-hcNNSM3WhE1r5vkF8LeQQRv2olk8gVdeG3AXlZNLSOLoU46Gq00JrqvRsiEnvm-X3yw_4RJ2efErSnxO2I-bw5KplU39DH-CiY-szhnmz6o05xGEoxAGtsHoWzSyzUKmHkFCYWO0PozxcT-ky6gdGMuGkfpwJugUp0KzUqH_KJpN7b2kYWJla6e3fHRC-59nEwxfkt")' }}
-            />
+              className="bg-gradient-to-br from-yellow-neon to-purple-neon rounded-full size-10 flex items-center justify-center neon-glow"
+            >
+              <span className="text-background font-bold text-lg">IMC</span>
+            </div>
             <div className="flex flex-col">
-              <h1 className="text-slate-900 dark:text-white text-base font-medium leading-normal">Cloudflare R2</h1>
-              <p className="text-slate-500 dark:text-[#9dabb9] text-sm font-normal leading-normal">Image Management</p>
+              <h1 className="text-yellow-neon text-base font-bold leading-normal neon-text">IMC Cloud Bucket</h1>
+              <p className="text-text-secondary text-sm font-normal leading-normal">Image Management</p>
             </div>
           </div>
           
           <nav className="flex flex-col gap-2 mt-4">
             <Link 
               to="/dashboard" 
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg ${
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
                 isActive('/dashboard') 
-                  ? 'bg-gradient-to-r from-[var(--gradient-start)]/10 to-[var(--gradient-end)]/10'
-                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-primary/20 text-primary neon-glow'
+                  : 'text-text-secondary hover:bg-card/50 hover:text-primary'
               }`}
             >
-              <span className={`material-symbols-outlined ${isActive('/dashboard') ? 'gradient-text' : ''}`} style={isActive('/dashboard') ? { fontVariationSettings: "'FILL' 1" } : {}}>
-                history
-              </span>
-              <p className={`text-sm font-medium leading-normal ${isActive('/dashboard') ? 'gradient-text' : ''}`}>
-                Recent Uploads
+              <MdHistory className="text-xl" />
+              <p className="text-sm font-medium leading-normal">
+                Upload
               </p>
             </Link>
             
             <Link 
               to="/gallery" 
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg ${
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
                 isActive('/gallery')
-                  ? 'bg-primary/10 text-primary dark:bg-primary/20'
-                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-primary/20 text-primary neon-glow'
+                  : 'text-text-secondary hover:bg-card/50 hover:text-primary'
               }`}
             >
-              <span className="material-symbols-outlined" style={isActive('/gallery') ? { fontVariationSettings: "'FILL' 1" } : {}}>
-                photo_library
-              </span>
-              <p className="text-sm font-medium leading-normal">List All</p>
+              <MdPhotoLibrary className="text-xl" />
+              <p className="text-sm font-medium leading-normal">Gallery</p>
             </Link>
           </nav>
         </div>
         
         <div className="flex flex-col gap-4">
-          <Link to="/dashboard">
-            <button className="flex min-w-[84px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] text-white text-sm font-bold leading-normal tracking-[0.015em]">
-              <span className="truncate">New Upload</span>
-            </button>
-          </Link>
+          <button 
+            onClick={handleNewUpload}
+            className="flex items-center justify-center gap-2 w-full rounded-lg h-10 px-4 gradient-bg text-white text-sm font-bold leading-normal tracking-[0.015em] neon-glow hover:shadow-neon-pink transition-all"
+          >
+            <MdUpload className="text-xl" />
+            <span className="truncate">New Upload</span>
+          </button>
           
           <div className="flex flex-col gap-1">
             <button 
               onClick={handleLogout}
-              className="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg w-full"
+              className="flex items-center gap-3 px-3 py-2 text-text-secondary hover:bg-card/50 hover:text-error rounded-lg w-full transition-all"
             >
-              <span className="material-symbols-outlined">logout</span>
+              <MdLogout className="text-xl" />
               <p className="text-sm font-medium leading-normal">Logout</p>
             </button>
           </div>
