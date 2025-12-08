@@ -43,31 +43,27 @@ def upload_image(request):
                 'error': f'Invalid file type. Allowed: {", ".join(allowed_extensions)}'
             }, status=400)
         
-        # Generate unique filename to avoid collisions
+        # Generate unique filename for storage
         unique_filename = f"{uuid.uuid4()}{file_ext}"
-        
-        # Save to Cloudflare R2 using default storage
-        file_path = default_storage.save(unique_filename, ContentFile(image_file.read()))
-        
-        # Get the full URL
-        file_url = default_storage.url(file_path)
-        
+        original_filename = getattr(image_file, 'original_name', None) or image_file.name  # Always capture before overwrite
+        image_file.name = unique_filename  # Force unique name for ImageField
+
         # Save metadata to database, store image file using ImageField
         image_obj = Image.objects.create(
             filename=unique_filename,
             image=image_file,
-            original_filename=image_file.name,
+            original_filename=original_filename,
             name=name,
             description=description,
             size=image_file.size
         )
-        
+
         return JsonResponse({
             'success': True,
             'id': image_obj.id,
             'url': image_obj.image.url if image_obj.image else None,
             'filename': unique_filename,
-            'original_filename': image_file.name,
+            'original_filename': original_filename,
             'name': name,
             'description': description,
             'size': image_file.size,
