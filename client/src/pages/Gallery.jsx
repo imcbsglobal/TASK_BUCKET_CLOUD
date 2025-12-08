@@ -1,36 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
-import { imageService } from '../services/api';
 import { MdSearch, MdOpenInNew, MdContentCopy, MdVisibility, MdDelete } from 'react-icons/md';
+import { useImages, useDeleteImage } from '../hooks/useImages';
 
 const Gallery = () => {
   const navigate = useNavigate();
-  const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [message, setMessage] = useState({ type: '', text: '' });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [imageToDelete, setImageToDelete] = useState(null);
 
-  useEffect(() => {
-    fetchImages();
-  }, []);
-
-  const fetchImages = async () => {
-    setLoading(true);
-    try {
-      const data = await imageService.listImages();
-      setImages(data.images || []);
-    } catch (error) {
-      console.error('Failed to fetch images:', error);
-      setMessage({ type: 'error', text: 'Failed to load images' });
-    } finally {
-      setLoading(false);
-    }
-  };
+  // React Query hooks
+  const { data: images = [], isLoading: loading } = useImages();
+  const deleteMutation = useDeleteImage();
 
   const copyToClipboard = (url) => {
     navigator.clipboard.writeText(url);
@@ -47,9 +32,8 @@ const Gallery = () => {
     if (!imageToDelete) return;
 
     try {
-      await imageService.deleteImage(imageToDelete);
+      await deleteMutation.mutateAsync(imageToDelete);
       setMessage({ type: 'success', text: 'Image deleted successfully!' });
-      fetchImages();
     } catch (error) {
       console.error('Failed to delete image:', error);
       setMessage({ type: 'error', text: 'Failed to delete image' });
@@ -111,7 +95,7 @@ const Gallery = () => {
             {searchQuery ? 'No images found matching your search' : 'No images uploaded yet'}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
             {filteredImages.map((image) => (
               <div
                 key={image.id}

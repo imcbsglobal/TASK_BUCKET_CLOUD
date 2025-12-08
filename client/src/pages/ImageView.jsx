@@ -2,50 +2,45 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Toast from '../components/Toast';
-import { imageService } from '../services/api';
 import { MdEdit, MdDelete, MdSave, MdClose, MdArrowBack } from 'react-icons/md';
+import { useImage, useUpdateImage, useDeleteImage } from '../hooks/useImages';
 
 const ImageView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [image, setImage] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  useEffect(() => {
-    fetchImage();
-  }, [id]);
+  // React Query hooks
+  const { data: image, isLoading: loading, isError, error } = useImage(id);
+  const updateMutation = useUpdateImage();
+  const deleteMutation = useDeleteImage();
 
-  const fetchImage = async () => {
-    setLoading(true);
-    try {
-      const data = await imageService.listImages();
-      const foundImage = data.images.find(img => img.id === parseInt(id));
-      if (foundImage) {
-        setImage(foundImage);
-        // Use original_filename as fallback for name when not provided
-        setName(foundImage.name || foundImage.original_filename || '');
-        setDescription(foundImage.description || '');
-      } else {
-        setMessage({ type: 'error', text: 'Image not found' });
-      }
-    } catch (error) {
-      console.error('Failed to fetch image:', error);
-      setMessage({ type: 'error', text: 'Failed to load image' });
-    } finally {
-      setLoading(false);
+  // Update local state when image data changes
+  useEffect(() => {
+    if (image) {
+      setName(image.name || image.original_filename || '');
+      setDescription(image.description || '');
     }
-  };
+  }, [image]);
+
+  useEffect(() => {
+    if (isError) {
+      setMessage({ type: 'error', text: error?.message || 'Failed to load image' });
+    }
+  }, [isError, error]);
 
   const handleUpdate = async () => {
     try {
-      await imageService.updateImage(id, name, description);
+      await updateMutation.mutateAsync({
+        id,
+        name,
+        description,
+      });
       setMessage({ type: 'success', text: 'Image updated successfully!' });
       setEditing(false);
-      fetchImage();
     } catch (error) {
       console.error('Update failed:', error);
       setMessage({ type: 'error', text: 'Failed to update image' });
@@ -58,7 +53,7 @@ const ImageView = () => {
     }
 
     try {
-      await imageService.deleteImage(id);
+      await deleteMutation.mutateAsync(id);
       setMessage({ type: 'success', text: 'Image deleted successfully!' });
       setTimeout(() => navigate('/gallery'), 1500);
     } catch (error) {

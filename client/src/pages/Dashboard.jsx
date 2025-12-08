@@ -1,34 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Layout from '../components/Layout';
 import Toast from '../components/Toast';
-import { imageService } from '../services/api';
 import { MdCloudUpload, MdContentCopy } from 'react-icons/md';
+import { useImages, useUploadImage } from '../hooks/useImages';
 
 const Dashboard = () => {
-  const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [customName, setCustomName] = useState('');
   const [description, setDescription] = useState('');
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  useEffect(() => {
-    fetchImages();
-  }, []);
-
-  const fetchImages = async () => {
-    setLoading(true);
-    try {
-      const data = await imageService.listImages();
-      setImages(data.images || []);
-    } catch (error) {
-      console.error('Failed to fetch images:', error);
-      setMessage({ type: 'error', text: 'Failed to load images' });
-    } finally {
-      setLoading(false);
-    }
-  };
+  // React Query hooks
+  const { data: images = [], isLoading: loading } = useImages();
+  const uploadMutation = useUploadImage();
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -48,24 +32,22 @@ const Dashboard = () => {
       return;
     }
 
-    setUploading(true);
-    setMessage({ type: '', text: '' });
-
     try {
-      const result = await imageService.uploadImage(selectedFile, customName, description);
+      await uploadMutation.mutateAsync({
+        file: selectedFile,
+        name: customName,
+        description: description,
+      });
+      
       setMessage({ type: 'success', text: 'Image uploaded successfully!' });
       setSelectedFile(null);
       setCustomName('');
       setDescription('');
       // Clear file input
       document.getElementById('fileInput').value = '';
-      // Refresh images list
-      fetchImages();
     } catch (error) {
       console.error('Upload failed:', error);
       setMessage({ type: 'error', text: error.response?.data?.error || 'Upload failed' });
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -181,10 +163,10 @@ const Dashboard = () => {
           <div className="px-4 pt-6">
             <button
               onClick={handleUpload}
-              disabled={!selectedFile || uploading}
+              disabled={!selectedFile || uploadMutation.isPending}
               className="flex w-full md:w-auto min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-6 gradient-bg text-white text-sm font-bold leading-normal tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed neon-glow hover:shadow-neon-pink transition-all"
             >
-              <span className="truncate">{uploading ? 'Uploading...' : 'Upload Image'}</span>
+              <span className="truncate">{uploadMutation.isPending ? 'Uploading...' : 'Upload Image'}</span>
             </button>
           </div>
         </div>
