@@ -6,7 +6,7 @@ class Image(models.Model):
     Model to store uploaded image metadata.
     """
     filename = models.CharField(max_length=255, unique=True, help_text="Unique filename stored in R2")
-    url = models.URLField(max_length=500, help_text="Full public URL of the image")
+    image = models.ImageField(upload_to="images/", help_text="Uploaded image file")
     original_filename = models.CharField(max_length=255, help_text="Original uploaded filename")
     
     # Optional fields

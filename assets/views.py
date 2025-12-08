@@ -52,10 +52,10 @@ def upload_image(request):
         # Get the full URL
         file_url = default_storage.url(file_path)
         
-        # Save metadata to database
+        # Save metadata to database, store image file using ImageField
         image_obj = Image.objects.create(
             filename=unique_filename,
-            url=file_url,
+            image=image_file,
             original_filename=image_file.name,
             name=name,
             description=description,
@@ -65,7 +65,7 @@ def upload_image(request):
         return JsonResponse({
             'success': True,
             'id': image_obj.id,
-            'url': file_url,
+            'url': image_obj.image.url if image_obj.image else None,
             'filename': unique_filename,
             'original_filename': image_file.name,
             'name': name,
@@ -98,7 +98,7 @@ def list_images(request):
             image_list.append({
                 'id': img.id,
                 'filename': img.filename,
-                'url': img.url,
+                'url': img.image.url if img.image else None,
                 'original_filename': img.original_filename,
                 'name': img.name,
                 'description': img.description,
