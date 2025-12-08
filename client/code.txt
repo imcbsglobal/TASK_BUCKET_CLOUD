@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login Page</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white">
+<div class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
+<div class="absolute inset-0">
+<div class="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-transparent to-purple-500/20 dark:from-blue-900/30 dark:to-purple-900/30"></div>
+</div>
+<div class="relative w-full max-w-md px-6">
+<div class="rounded-xl border border-slate-200/50 bg-white/50 p-8 shadow-lg backdrop-blur-lg dark:border-slate-800/50 dark:bg-[#1c2127]/50">
+<div class="mb-8 text-center">
+<div class="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8" data-alt="Cloudflare R2 logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBUl-On-iWKZRycimaLnZEaEcIjc-TlJIF2ZjoDAtJKdvHoyXKUK_ocgDy5FJbPCgPq-0Mae-hcNNSM3WhE1r5vkF8LeQQRv2olk8gVdeG3AXlZNLSOLoU46Gq00JrqvRsiEnvm-X3yw_4RJ2efErSnxO2I-bw5KplU39DH-CiY-szhnmz6o05xGEoxAGtsHoWzSyzUKmHkFCYWO0PozxcT-ky6gdGMuGkfpwJugUp0KzUqH_KJpN7b2kYWJla6e3fHRC-59nEwxfkt");'></div>
+</div>
+<h1 class="text-3xl font-bold tracking-tighter">Welcome Back</h1>
+<p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Sign in to manage your image uploads.</p>
+</div>
+<form class="space-y-6">
+<div>
+<label class="mb-2 block text-sm font-medium" for="email">Username or Email</label>
+<div class="relative">
+<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+<span class="material-symbols-outlined text-slate-400">person</span>
+</span>
+<input class="form-input block w-full rounded-lg border border-slate-300 bg-background-light p-3 pl-10 text-base placeholder:text-slate-400 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-[#101922] dark:placeholder:text-slate-500 dark:focus:border-primary dark:focus:ring-primary" id="email" name="email" placeholder="you@example.com" required="" type="email"/>
+</div>
+</div>
+<div>
+<div class="flex items-center justify-between">
+<label class="mb-2 block text-sm font-medium" for="password">Password</label>
+<a class="text-sm font-medium text-primary hover:underline" href="#">Forgot Password?</a>
+</div>
+<div class="relative">
+<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+<span class="material-symbols-outlined text-slate-400">lock</span>
+</span>
+<input class="form-input block w-full rounded-lg border border-slate-300 bg-background-light p-3 pl-10 text-base placeholder:text-slate-400 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-[#101922] dark:placeholder:text-slate-500 dark:focus:border-primary dark:focus:ring-primary" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+</div>
+</div>
+<div>
+<button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 focus:outline-none focus:ring-4 focus:ring-primary/50" type="submit">
+<span class="truncate">Login</span>
+</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+
+</body></html>,,,,,,,,,,,
+
+
+
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Image Management Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        :root {
+            --gradient-start: #ff8d27;
+            --gradient-end: #d532a2;
+            --gradient-via: #ff495c;
+        }
+        .gradient-text {
+            @apply bg-gradient-to-r from-[var(--gradient-start)] via-[var(--gradient-via)] to-[var(--gradient-end)] bg-clip-text text-transparent;
+        }
+    </style>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="flex min-h-screen">
+<aside class="w-64 flex-shrink-0 bg-[#fbfcfc] dark:bg-[#111418] border-r border-slate-200 dark:border-slate-800 p-4">
+<div class="flex h-full flex-col justify-between">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Cloudflare R2 logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBUl-On-iWKZRycimaLnZEaEcIjc-TlJIF2ZjoDAtJKdvHoyXKUK_ocgDy5FJbPCgPq-0Mae-hcNNSM3WhE1r5vkF8LeQQRv2olk8gVdeG3AXlZNLSOLoU46Gq00JrqvRsiEnvm-X3yw_4RJ2efErSnxO2I-bw5KplU39DH-CiY-szhnmz6o05xGEoxAGtsHoWzSyzUKmHkFCYWO0PozxcT-ky6gdGMuGkfpwJugUp0KzUqH_KJpN7b2kYWJla6e3fHRC-59nEwxfkt");'></div>
+<div class="flex flex-col">
+<h1 class="text-slate-900 dark:text-white text-base font-medium leading-normal">Cloudflare R2</h1>
+<p class="text-slate-500 dark:text-[#9dabb9] text-sm font-normal leading-normal">Image Management</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg bg-gradient-to-r from-[var(--gradient-start)]/10 to-[var(--gradient-end)]/10" href="#">
+<span class="material-symbols-outlined gradient-text" style="font-variation-settings: 'FILL' 1;">history</span>
+<p class="text-sm font-medium leading-normal gradient-text">Recent Uploads</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">list</span>
+<p class="text-sm font-medium leading-normal">List All</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">edit_note</span>
+<p class="text-sm font-medium leading-normal">Update Each One</p>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-4">
+<button class="flex min-w-[84px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] text-white text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">New Upload</span>
+</button>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">help</span>
+<p class="text-sm font-medium leading-normal">Help</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<p class="text-sm font-medium leading-normal">Logout</p>
+</a>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 p-6 lg:p-10">
+<div class="mx-auto max-w-4xl">
+<div class="flex flex-wrap justify-between gap-3 mb-8">
+<h1 class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Image Management Dashboard</h1>
+</div>
+<div class="mb-10">
+<h2 class="text-slate-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] mb-4">Recent Uploads</h2>
+<div class="overflow-x-auto bg-white dark:bg-[#1c2127] rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
+<table class="w-full text-sm text-left">
+<thead class="text-xs text-slate-500 dark:text-slate-400 uppercase bg-slate-50 dark:bg-slate-900/50">
+<tr>
+<th class="px-6 py-3 w-24" scope="col">Preview</th>
+<th class="px-6 py-3" scope="col">Name</th>
+<th class="px-6 py-3" scope="col">Description</th>
+<th class="px-6 py-3" scope="col">Date Uploaded</th>
+<th class="px-6 py-3 text-right" scope="col">URL</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-b border-slate-200 dark:border-slate-800">
+<td class="px-6 py-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-md h-12 w-12" data-alt="Abstract blue and purple shapes" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCyr7sSTvLJ_tdroQh4BJ9_tXE56u-x0AaYbbOuYMghld0PtMwyxhZc9O4op3hXkINjIaBqgnwmVm3beMUktT7FZdascdheRlI9gA8r1qyBctfXMRkqb1RerzNXcQMSqcLMtoC_uvXC2b029PzH-C6EcGAOEA3ZH28cWuQoSmuDmEBlYnHIrHhfV9_R1ZvouIfiIhlaSdASydF9-CE3JUYEQtzgV-01DEuzDKU6OSSeVXMfGVfPp_MIZe9dAvOSDmvF3SxKJRTVJuUV");'></div>
+</td>
+<td class="px-6 py-4 font-medium text-slate-900 dark:text-white">aurora-background.png</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">Hero background for landing page</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">2024-05-21</td>
+<td class="px-6 py-4 text-right">
+<button class="inline-flex items-center justify-center p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined !text-xl">content_copy</span>
+</button>
+</td>
+</tr>
+<tr class="border-b border-slate-200 dark:border-slate-800">
+<td class="px-6 py-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-md h-12 w-12" data-alt="Product screenshot of a dashboard UI" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDJEplabo1CDuktt5ljEuuiHsTcQj0wB8ADynyhulJ7gF7suA0xvKQHLlXerjc322RbUU-HRzG8cWXf7hSi9PXfzqZnweF28awSWk44F7pQoFj_zfEwFT_gO15STQFMOEJ7H2Njqg3lf54QhN570LFSzO7t_5innDy_ADS7hv9IHPplhiU4Dra3wputHE5cLa0jM-liqV8iUtrYLZqwWUMMkwWc_s1St30bP42lz3FEHiY3RFRvn4EMhbR8KuGw1FiQ1hVWvcyeioo6");'></div>
+</td>
+<td class="px-6 py-4 font-medium text-slate-900 dark:text-white">dashboard-v2.jpg</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">Updated dashboard design</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">2024-05-20</td>
+<td class="px-6 py-4 text-right">
+<button class="inline-flex items-center justify-center p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined !text-xl">content_copy</span>
+</button>
+</td>
+</tr>
+<tr class="border-b border-slate-200 dark:border-slate-800">
+<td class="px-6 py-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-md h-12 w-12" data-alt="Company logo with green icon" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDhylILFnwrgGolJR0U1aKsUTuv2kRlUOpHbgeNX-WSY3vwpkjBUG2gP9_ht5ITLLGfkgBTDYUEJXhUF1rsm6EyjSvc3ddNNe0YM5Spm3Vr2Se20HUlCKnP86x2d_UjbR0cRNOANunjj1C5N25BGyAFNyGW8ZMv3CUS1wGJpWQt4p4rZAIhY0uRMLbqIenIOb4dqqS2yB3juLSaVQ8EGoiQK9pcmTQUxdjtEVawvvAt67dt-360MUcKV2ykICJxt1xu4R_hNbwz3Rct");'></div>
+</td>
+<td class="px-6 py-4 font-medium text-slate-900 dark:text-white">company_logo_green.svg</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">-</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">2024-05-19</td>
+<td class="px-6 py-4 text-right">
+<button class="inline-flex items-center justify-center p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined !text-xl">content_copy</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="bg-white dark:bg-[#1c2127] rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6">
+<h2 class="text-slate-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-5">Upload a New Image</h2>
+<div class="flex flex-col p-4 mb-6">
+<div class="flex flex-col items-center gap-6 rounded-lg border-2 border-dashed border-slate-300 dark:border-[#3b4754] px-6 py-14">
+<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 !text-5xl">cloud_upload</span>
+<div class="flex max-w-[480px] flex-col items-center gap-2">
+<p class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] text-center">Drag &amp; drop your image here, or browse files</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal text-center">Select a file to upload from your computer.</p>
+</div>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-slate-200 dark:bg-[#283039] text-slate-900 dark:text-white text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">Browse files</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-4">
+<label class="flex flex-col">
+<p class="text-slate-800 dark:text-white text-base font-medium leading-normal pb-2">Custom Name (Optional)</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-[var(--gradient-start)]/50 border border-slate-300 dark:border-[#3b4754] bg-background-light dark:bg-[#101922] h-12 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] p-3 text-base font-normal leading-normal" placeholder="Enter a custom name"/>
+</label>
+<label class="flex flex-col md:col-span-2">
+<p class="text-slate-800 dark:text-white text-base font-medium leading-normal pb-2">Description (Optional)</p>
+<textarea class="form-textarea flex w-full min-w-0 flex-1 resize-y overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-[var(--gradient-start)]/50 border border-slate-300 dark:border-[#3b4754] bg-background-light dark:bg-[#101922] h-24 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] p-3 text-base font-normal leading-normal" placeholder="Add a short description..."></textarea>
+</label>
+</div>
+<div class="px-4 pt-6">
+<button class="flex w-full md:w-auto min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-6 bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] text-white text-sm font-bold leading-normal tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed">
+<span class="truncate">Upload Image</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>
+
+
+
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Image Gallery</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="flex min-h-screen">
+<aside class="w-64 flex-shrink-0 bg-[#fbfcfc] dark:bg-[#111418] border-r border-slate-200 dark:border-slate-800 p-4">
+<div class="flex h-full flex-col justify-between">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Cloudflare R2 logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBUl-On-iWKZRycimaLnZEaEcIjc-TlJIF2ZjoDAtJKdvHoyXKUK_ocgDy5FJbPCgPq-0Mae-hcNNSM3WhE1r5vkF8LeQQRv2olk8gVdeG3AXlZNLSOLoU46Gq00JrqvRsiEnvm-X3yw_4RJ2efErSnxO2I-bw5KplU39DH-CiY-szhnmz6o05xGEoxAGtsHoWzSyzUKmHkFCYWO0PozxcT-ky6gdGMuGkfpwJugUp0KzUqH_KJpN7b2kYWJla6e3fHRC-59nEwxfkt");'></div>
+<div class="flex flex-col">
+<h1 class="text-slate-900 dark:text-white text-base font-medium leading-normal">Cloudflare R2</h1>
+<p class="text-slate-500 dark:text-[#9dabb9] text-sm font-normal leading-normal">Image Management</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">upload</span>
+<p class="text-sm font-medium leading-normal">Uploads</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary dark:bg-primary/20" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">photo_library</span>
+<p class="text-sm font-medium leading-normal">List All</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">pie_chart</span>
+<p class="text-sm font-medium leading-normal">Analytics</p>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-4">
+<button class="flex min-w-[84px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">New Upload</span>
+</button>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">help</span>
+<p class="text-sm font-medium leading-normal">Help</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<p class="text-sm font-medium leading-normal">Logout</p>
+</a>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 p-6 lg:p-10">
+<div class="mx-auto max-w-7xl">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+<h1 class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Image Gallery</h1>
+<div class="flex items-center gap-4">
+<div class="relative w-full md:w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 !text-2xl">search</span>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-[#3b4754] bg-white dark:bg-[#1c2127] h-11 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] p-3 text-base font-normal leading-normal pl-11" placeholder="Search images..."/>
+</div>
+<button class="flex shrink-0 min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 bg-white dark:bg-[#1c2127] border border-slate-300 dark:border-[#3b4754] text-slate-900 dark:text-white text-sm font-bold leading-normal tracking-[0.015em] gap-2">
+<span class="material-symbols-outlined">filter_list</span>
+<span class="truncate">Filter</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+<div class="group relative overflow-hidden rounded-xl bg-white dark:bg-[#1c2127] shadow-sm border border-slate-200 dark:border-slate-800">
+<div class="aspect-square bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCyr7sSTvLJ_tdroQh4BJ9_tXE56u-x0AaYbbOuYMghld0PtMwyxhZc9O4op3hXkINjIaBqgnwmVm3beMUktT7FZdascdheRlI9gA8r1qyBctfXMRkqb1RerzNXcQMSqcLMtoC_uvXC2b029PzH-C6EcGAOEA3ZH28cWuQoSmuDmEBlYnHIrHhfV9_R1ZvouIfiIhlaSdASydF9-CE3JUYEQtzgV-01DEuzDKU6OSSeVXMfGVfPp_MIZe9dAvOSDmvF3SxKJRTVJuUV");'></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
+<div class="absolute bottom-0 left-0 right-0 p-4">
+<p class="text-white text-sm font-medium leading-tight truncate">aurora-background.png</p>
+<div class="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">info</span>
+</button>
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">content_copy</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl bg-white dark:bg-[#1c2127] shadow-sm border border-slate-200 dark:border-slate-800">
+<div class="aspect-square bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDJEplabo1CDuktt5ljEuuiHsTcQj0wB8ADynyhulJ7gF7suA0xvKQHLlXerjc322RbUU-HRzG8cWXf7hSi9PXfzqZnweF28awSWk44F7pQoFj_zfEwFT_gO15STQFMOEJ7H2Njqg3lf54QhN570LFSzO7t_5innDy_ADS7hv9IHPplhiU4Dra3wputHE5cLa0jM-liqV8iUtrYLZqwWUMMkwWc_s1St30bP42lz3FEHiY3RFRvn4EMhbR8KuGw1FiQ1hVWvcyeioo6");'></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
+<div class="absolute bottom-0 left-0 right-0 p-4">
+<p class="text-white text-sm font-medium leading-tight truncate">dashboard-v2.jpg</p>
+<div class="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">info</span>
+</button>
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">content_copy</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl bg-white dark:bg-[#1c2127] shadow-sm border border-slate-200 dark:border-slate-800">
+<div class="aspect-square bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDhylILFnwrgGolJR0U1aKsUTuv2kRlUOpHbgeNX-WSY3vwpkjBUG2gP9_ht5ITLLGfkgBTDYUEJXhUF1rsm6EyjSvc3ddNNe0YM5Spm3Vr2Se20HUlCKnP86x2d_UjbR0cRNOANunjj1C5N25BGyAFNyGW8ZMv3CUS1wGJpWQt4p4rZAIhY0uRMLbqIenIOb4dqqS2yB3juLSaVQ8EGoiQK9pcmTQUxdjtEVawvvAt67dt-360MUcKV2ykICJxt1xu4R_hNbwz3Rct");'></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
+<div class="absolute bottom-0 left-0 right-0 p-4">
+<p class="text-white text-sm font-medium leading-tight truncate">company_logo_green.svg</p>
+<div class="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">info</span>
+</button>
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">content_copy</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl bg-white dark:bg-[#1c2127] shadow-sm border border-slate-200 dark:border-slate-800">
+<div class="aspect-square bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDFy4xMPHRKbTgun_kSgge-K-3uFP_FGJSWLLxXNhqwUJ5HBpXDdJHADat3uGS608jIfMANiwGSXUN6vEL3bPXBzeuKreu7kPXn5RN8-pYmXCSSP4GXvCVRFmfna_2326WZugwA853iNoI391TuyuwqaO18F-RTiQAnZlsGH2ykXLNqeZaKSSwyQHdkb5YKEhew6-e88ZGrPknw00gQ2EOrvYsZBay8u6hJpwMhuG5PHuHb1wvUJJ_znQCiPTcm4F8ecObrbsgcmOAg");'></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
+<div class="absolute bottom-0 left-0 right-0 p-4">
+<p class="text-white text-sm font-medium leading-tight truncate">gradient-wave.png</p>
+<div class="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">info</span>
+</button>
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">content_copy</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl bg-white dark:bg-[#1c2127] shadow-sm border border-slate-200 dark:border-slate-800">
+<div class="aspect-square bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDFy4xMPHRKbTgun_kSgge-K-3uFP_FGJSWLLxXNhqwUJ5HBpXDdJHADat3uGS608jIfMANiwGSXUN6vEL3bPXBzeuKreu7kPXn5RN8-pYmXCSSP4GXvCVRFmfna_2326WZugwA853iNoI391TuyuwqaO18F-RTiQAnZlsGH2ykXLNqeZaKSSwyQHdkb5YKEhew6-e88ZGrPknw00gQ2EOrvYsZBay8u6hJpwMhuG5PHuHb1wvUJJ_znQCiPTcm4F8ecObrbsgcmOAg");'></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
+<div class="absolute bottom-0 left-0 right-0 p-4">
+<p class="text-white text-sm font-medium leading-tight truncate">marble-texture.jpg</p>
+<div class="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">info</span>
+</button>
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">content_copy</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl bg-white dark:bg-[#1c2127] shadow-sm border border-slate-200 dark:border-slate-800">
+<div class="aspect-square bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDFy4xMPHRKbTgun_kSgge-K-3uFP_FGJSWLLxXNhqwUJ5HBpXDdJHADat3uGS608jIfMANiwGSXUN6vEL3bPXBzeuKreu7kPXn5RN8-pYmXCSSP4GXvCVRFmfna_2326WZugwA853iNoI391TuyuwqaO18F-RTiQAnZlsGH2ykXLNqeZaKSSwyQHdkb5YKEhew6-e88ZGrPknw00gQ2EOrvYsZBay8u6hJpwMhuG5PHuHb1wvUJJ_znQCiPTcm4F8ecObrbsgcmOAg");'></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
+<div class="absolute bottom-0 left-0 right-0 p-4">
+<p class="text-white text-sm font-medium leading-tight truncate">colorful-blur.png</p>
+<div class="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">info</span>
+</button>
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">content_copy</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl bg-white dark:bg-[#1c2127] shadow-sm border border-slate-200 dark:border-slate-800">
+<div class="aspect-square bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDFy4xMPHRKbTgun_kSgge-K-3uFP_FGJSWLLxXNhqwUJ5HBpXDdJHADat3uGS608jIfMANiwGSXUN6vEL3bPXBzeuKreu7kPXn5RN8-pYmXCSSP4GXvCVRFmfna_2326WZugwA853iNoI391TuyuwqaO18F-RTiQAnZlsGH2ykXLNqeZaKSSwyQHdkb5YKEhew6-e88ZGrPknw00gQ2EOrvYsZBay8u6hJpwMhuG5PHuHb1wvUJJ_znQCiPTcm4F8ecObrbsgcmOAg");'></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
+<div class="absolute bottom-0 left-0 right-0 p-4">
+<p class="text-white text-sm font-medium leading-tight truncate">powder-explosion.jpg</p>
+<div class="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">info</span>
+</button>
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">content_copy</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl bg-white dark:bg-[#1c2127] shadow-sm border border-slate-200 dark:border-slate-800">
+<div class="aspect-square bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDFy4xMPHRKbTgun_kSgge-K-3uFP_FGJSWLLxXNhqwUJ5HBpXDdJHADat3uGS608jIfMANiwGSXUN6vEL3bPXBzeuKreu7kPXn5RN8-pYmXCSSP4GXvCVRFmfna_2326WZugwA853iNoI391TuyuwqaO18F-RTiQAnZlsGH2ykXLNqeZaKSSwyQHdkb5YKEhew6-e88ZGrPknw00gQ2EOrvYsZBay8u6hJpwMhuG5PHuHb1wvUJJ_znQCiPTcm4F8ecObrbsgcmOAg");'></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
+<div class="absolute bottom-0 left-0 right-0 p-4">
+<p class="text-white text-sm font-medium leading-tight truncate">3d-shapes.png</p>
+<div class="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">info</span>
+</button>
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">content_copy</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl bg-white dark:bg-[#1c2127] shadow-sm border border-slate-200 dark:border-slate-800">
+<div class="aspect-square bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDFy4xMPHRKbTgun_kSgge-K-3uFP_FGJSWLLxXNhqwUJ5HBpXDdJHADat3uGS608jIfMANiwGSXUN6vEL3bPXBzeuKreu7kPXn5RN8-pYmXCSSP4GXvCVRFmfna_2326WZugwA853iNoI391TuyuwqaO18F-RTiQAnZlsGH2ykXLNqeZaKSSwyQHdkb5YKEhew6-e88ZGrPknw00gQ2EOrvYsZBay8u6hJpwMhuG5PHuHb1wvUJJ_znQCiPTcm4F8ecObrbsgcmOAg");'></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
+<div class="absolute bottom-0 left-0 right-0 p-4">
+<p class="text-white text-sm font-medium leading-tight truncate">pastel-concrete.jpg</p>
+<div class="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">info</span>
+</button>
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">content_copy</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl bg-white dark:bg-[#1c2127] shadow-sm border border-slate-200 dark:border-slate-800">
+<div class="aspect-square bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDFy4xMPHRKbTgun_kSgge-K-3uFP_FGJSWLLxXNhqwUJ5HBpXDdJHADat3uGS608jIfMANiwGSXUN6vEL3bPXBzeuKreu7kPXn5RN8-pYmXCSSP4GXvCVRFmfna_2326WZugwA853iNoI391TuyuwqaO18F-RTiQAnZlsGH2ykXLNqeZaKSSwyQHdkb5YKEhew6-e88ZGrPknw00gQ2EOrvYsZBay8u6hJpwMhuG5PHuHb1wvUJJ_znQCiPTcm4F8ecObrbsgcmOAg");'></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
+<div class="absolute bottom-0 left-0 right-0 p-4">
+<p class="text-white text-sm font-medium leading-tight truncate">liquid-abstract.png</p>
+<div class="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">info</span>
+</button>
+<button class="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined !text-xl">content_copy</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>
+
+
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Image Detail View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#137fec",
+                    "background-light": "#f6f7f8",
+                    "background-dark": "#101922",
+                },
+                fontFamily: {
+                    "display": ["Space Grotesk", "sans-serif"]
+                },
+                borderRadius: {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+                },
+            },
+        },
+    }
+    </script>
+<style>
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        font-size: 24px;
+    }
+    .gradient-bg {
+        background: linear-gradient(105deg, #007cf0, #00dfd8);
+    }
+    .danger-bg {
+        background: linear-gradient(105deg, #f04400, #f08300);
+    }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="flex min-h-screen">
+<aside class="w-64 flex-shrink-0 bg-[#fbfcfc] dark:bg-[#111418] border-r border-slate-200 dark:border-slate-800 p-4">
+<div class="flex h-full flex-col justify-between">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Cloudflare R2 logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBUl-On-iWKZRycimaLnZEaEcIjc-TlJIF2ZjoDAtJKdvHoyXKUK_ocgDy5FJbPCgPq-0Mae-hcNNSM3WhE1r5vkF8LeQQRv2olk8gVdeG3AXlZNLSOLoU46Gq00JrqvRsiEnvm-X3yw_4RJ2efErSnxO2I-bw5KplU39DH-CiY-szhnmz6o05xGEoxAGtsHoWzSyzUKmHkFCYWO0PozxcT-ky6gdGMuGkfpwJugUp0KzUqH_KJpN7b2kYWJla6e3fHRC-59nEwxfkt");'></div>
+<div class="flex flex-col">
+<h1 class="text-slate-900 dark:text-white text-base font-medium leading-normal">Cloudflare R2</h1>
+<p class="text-slate-500 dark:text-[#9dabb9] text-sm font-normal leading-normal">Image Management</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">upload</span>
+<p class="text-sm font-medium leading-normal">Uploads</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-primary/10 text-primary dark:bg-primary/20 rounded-lg" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">image</span>
+<p class="text-sm font-medium leading-normal">Update Each One</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">photo_library</span>
+<p class="text-sm font-medium leading-normal">Image Gallery</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-4">
+<button class="flex min-w-[84px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">New Upload</span>
+</button>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">help</span>
+<p class="text-sm font-medium leading-normal">Help</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<p class="text-sm font-medium leading-normal">Logout</p>
+</a>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 p-6 lg:p-10">
+<div class="mx-auto max-w-6xl">
+<div class="flex flex-wrap justify-between gap-3 mb-8">
+<h1 class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Image Detail View</h1>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+<div class="lg:col-span-3">
+<div class="bg-white dark:bg-[#1c2127] rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-4">
+<div class="aspect-w-16 aspect-h-9">
+<div class="w-full h-full bg-center bg-no-repeat bg-contain rounded-lg" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCyr7sSTvLJ_tdroQh4BJ9_tXE56u-x0AaYbbOuYMghld0PtMwyxhZc9O4op3hXkINjIaBqgnwmVm3beMUktT7FZdascdheRlI9gA8r1qyBctfXMRkqb1RerzNXcQMSqcLMtoC_uvXC2b029PzH-C6EcGAOEA3ZH28cWuQoSmuDmEBlYnHIrHhfV9_R1ZvouIfiIhlaSdASydF9-CE3JUYEQtzgV-01DEuzDKU6OSSeVXMfGVfPp_MIZe9dAvOSDmvF3SxKJRTVJuUV"); background-color: #101922;'></div>
+</div>
+</div>
+</div>
+<div class="lg:col-span-2">
+<div class="bg-white dark:bg-[#1c2127] rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6">
+<h2 class="text-slate-900 dark:text-white text-2xl font-bold leading-tight tracking-[-0.015em] mb-6">Metadata</h2>
+<div class="flex flex-col gap-4">
+<div>
+<p class="text-sm text-slate-500 dark:text-slate-400">Filename</p>
+<p class="text-base font-medium text-slate-900 dark:text-white">aurora-background.png</p>
+</div>
+<div>
+<p class="text-sm text-slate-500 dark:text-slate-400">URL</p>
+<div class="flex items-center gap-2">
+<p class="text-base font-medium text-slate-900 dark:text-white truncate">https://.../aurora-background.png</p>
+<button class="inline-flex items-center justify-center p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 flex-shrink-0">
+<span class="material-symbols-outlined !text-xl">content_copy</span>
+</button>
+</div>
+</div>
+<div>
+<p class="text-sm text-slate-500 dark:text-slate-400">Size</p>
+<p class="text-base font-medium text-slate-900 dark:text-white">1.2 MB</p>
+</div>
+<div>
+<p class="text-sm text-slate-500 dark:text-slate-400">Upload Date</p>
+<p class="text-base font-medium text-slate-900 dark:text-white">2024-05-21</p>
+</div>
+<div>
+<p class="text-sm text-slate-500 dark:text-slate-400">Custom Name</p>
+<p class="text-base font-medium text-slate-900 dark:text-white">Aurora Hero</p>
+</div>
+<div>
+<p class="text-sm text-slate-500 dark:text-slate-400">Description</p>
+<p class="text-base font-medium text-slate-900 dark:text-white">Hero background for landing page</p>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row gap-4">
+<button class="flex w-full cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-11 px-6 text-white text-sm font-bold leading-normal tracking-[0.015em] gradient-bg">
+<span class="material-symbols-outlined !text-xl">edit</span>
+<span class="truncate">Update Details</span>
+</button>
+<button class="flex w-full cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-11 px-6 text-white text-sm font-bold leading-normal tracking-[0.015em] danger-bg">
+<span class="material-symbols-outlined !text-xl">delete</span>
+<span class="truncate">Delete Image</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>
