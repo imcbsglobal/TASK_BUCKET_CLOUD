@@ -1,14 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Toast from '../components/Toast';
+import ConfirmModal from '../components/ConfirmModal';
 import { imageService } from '../services/api';
-import { MdSearch, MdOpenInNew, MdContentCopy } from 'react-icons/md';
+import { MdSearch, MdOpenInNew, MdContentCopy, MdVisibility, MdDelete } from 'react-icons/md';
 
 const Gallery = () => {
+  const navigate = useNavigate();
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [imageToDelete, setImageToDelete] = useState(null);
 
   useEffect(() => {
     fetchImages();
@@ -33,6 +38,26 @@ const Gallery = () => {
     setTimeout(() => setMessage({ type: '', text: '' }), 2000);
   };
 
+  const handleDeleteClick = (imageId) => {
+    setImageToDelete(imageId);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!imageToDelete) return;
+
+    try {
+      await imageService.deleteImage(imageToDelete);
+      setMessage({ type: 'success', text: 'Image deleted successfully!' });
+      fetchImages();
+    } catch (error) {
+      console.error('Failed to delete image:', error);
+      setMessage({ type: 'error', text: 'Failed to delete image' });
+    } finally {
+      setImageToDelete(null);
+    }
+  };
+
   const filteredImages = images.filter((image) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -48,6 +73,15 @@ const Gallery = () => {
         type={message.type} 
         message={message.text} 
         onClose={() => setMessage({ type: '', text: '' })}
+      />
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Image"
+        message="Are you sure you want to delete this image? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
       />
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -81,7 +115,8 @@ const Gallery = () => {
             {filteredImages.map((image) => (
               <div
                 key={image.id}
-                className="group relative overflow-hidden rounded-xl bg-card border border-purple-neon/30 hover:border-primary/50 transition-all neon-glow hover:shadow-neon-pink"
+                className="group relative overflow-hidden rounded-xl bg-card border border-purple-neon/30 hover:border-primary/50 transition-all neon-glow hover:shadow-neon-pink cursor-pointer"
+                onClick={() => navigate(`/image/${image.id}`)}
               >
                 <div
                   className="aspect-square bg-cover bg-center"
@@ -99,16 +134,44 @@ const Gallery = () => {
                   )}
                   <div className="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
-                      onClick={() => window.open(image.url, '_blank')}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/image/${image.id}`);
+                      }}
                       className="inline-flex items-center justify-center p-2 rounded-lg bg-primary/30 hover:bg-primary text-white backdrop-blur-sm transition-all"
+                      title="View Details"
+                    >
+                      <MdVisibility className="text-xl" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(image.url, '_blank');
+                      }}
+                      className="inline-flex items-center justify-center p-2 rounded-lg bg-primary/30 hover:bg-primary text-white backdrop-blur-sm transition-all"
+                      title="Open in New Tab"
                     >
                       <MdOpenInNew className="text-xl" />
                     </button>
                     <button
-                      onClick={() => copyToClipboard(image.url)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        copyToClipboard(image.url);
+                      }}
                       className="inline-flex items-center justify-center p-2 rounded-lg bg-primary/30 hover:bg-primary text-white backdrop-blur-sm transition-all"
+                      title="Copy URL"
                     >
                       <MdContentCopy className="text-xl" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClick(image.id);
+                      }}
+                      className="inline-flex items-center justify-center p-2 rounded-lg bg-red-500/30 hover:bg-red-500 text-white backdrop-blur-sm transition-all"
+                      title="Delete Image"
+                    >
+                      <MdDelete className="text-xl" />
                     </button>
                   </div>
                 </div>

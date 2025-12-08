@@ -34,6 +34,11 @@ const Dashboard = () => {
     const file = e.target.files[0];
     if (file) {
       setSelectedFile(file);
+      // If the user hasn't provided a custom name, use the filename (without extension)
+      if (!customName) {
+        const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
+        setCustomName(nameWithoutExt);
+      }
     }
   };
 
@@ -150,7 +155,7 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-4">
             <label className="flex flex-col">
               <p className="text-text-primary text-base font-medium leading-normal pb-2">
-                Custom Name (Optional)
+                Name (Optional)
               </p>
               <input
                 className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-purple-neon/30 bg-background h-12 placeholder:text-text-secondary p-3 text-base font-normal leading-normal"

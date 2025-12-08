@@ -212,3 +212,4 @@ def delete_image(request, image_id):
             'success': False,
             'error': f'Delete failed: {str(e)}'
         }, status=500)
+

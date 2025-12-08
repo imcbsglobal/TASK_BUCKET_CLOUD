@@ -30,6 +30,21 @@ export const imageService = {
     const response = await api.get('/list/');
     return response.data;
   },
+
+  // Update image metadata
+  updateImage: async (imageId, name, description) => {
+    const response = await api.put(`/update/${imageId}/`, {
+      name,
+      description,
+    });
+    return response.data;
+  },
+
+  // Delete an image
+  deleteImage: async (imageId) => {
+    const response = await api.delete(`/delete/${imageId}/`);
+    return response.data;
+  },
 };
 
 export default api;

@@ -7,6 +7,8 @@ A simple Django REST API for uploading images to Cloudflare R2 bucket and retrie
 - ✅ Upload images to Cloudflare R2 bucket
 - ✅ Get public URLs for uploaded images
 - ✅ List all uploaded images with their URLs
+- ✅ Update image metadata (name, description)
+- ✅ Delete images from storage and database
 - ✅ Supported formats: JPG, JPEG, PNG, GIF, WEBP, BMP
 - ✅ No authentication required
 - ✅ CSRF protection disabled for API endpoints
@@ -168,6 +170,106 @@ print(response.json())
   ]
 }
 ```
+
+### 3. Update Image Metadata
+
+**Endpoint:** `PUT /api/update/<image_id>/`
+
+**Request:**
+- Content-Type: `application/json`
+- Body:
+  - `name` (optional): Update the image name
+  - `description` (optional): Update the image description
+
+**Example using curl:**
+
+```bash
+curl -X PUT http://127.0.0.1:8000/api/update/1/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Sunset",
+    "description": "A beautiful sunset at the beach during summer"
+  }'
+```
+
+**Example using Python requests:**
+
+```python
+import requests
+
+url = "http://127.0.0.1:8000/api/update/1/"
+data = {
+    "name": "Updated Sunset",
+    "description": "A beautiful sunset at the beach during summer"
+}
+response = requests.put(url, json=data)
+print(response.json())
+```
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "id": 1,
+  "filename": "abc123-def456.jpg",
+  "url": "https://pub-xxxxxxxx.r2.dev/abc123-def456.jpg",
+  "original_filename": "sunset.jpg",
+  "name": "Updated Sunset",
+  "description": "A beautiful sunset at the beach during summer",
+  "size": 245678,
+  "uploaded_at": "2025-12-08T12:30:45.123456Z"
+}
+```
+
+**Error Response (404):**
+
+```json
+{
+  "success": false,
+  "error": "Image with id 1 not found."
+}
+```
+
+### 4. Delete Image
+
+**Endpoint:** `DELETE /api/delete/<image_id>/`
+
+**Example using curl:**
+
+```bash
+curl -X DELETE http://127.0.0.1:8000/api/delete/1/
+```
+
+**Example using Python requests:**
+
+```python
+import requests
+
+url = "http://127.0.0.1:8000/api/delete/1/"
+response = requests.delete(url)
+print(response.json())
+```
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "message": "Image 1 deleted successfully."
+}
+```
+
+**Error Response (404):**
+
+```json
+{
+  "success": false,
+  "error": "Image with id 1 not found."
+}
+```
+
+> **Note:** Deleting an image removes it from both the database and Cloudflare R2 storage. All references to the image URL will become invalid.
 
 > **Note:** All image URLs returned by the API are public Cloudflare R2 URLs, not local `/media/` paths. Images are stored in your Cloudflare R2 bucket and served from there.
 

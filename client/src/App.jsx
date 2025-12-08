@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Gallery from './pages/Gallery';
+import ImageView from './pages/ImageView';
 import './index.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -42,6 +43,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Gallery />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/image/:id"
+            element={
+              <ProtectedRoute>
+                <ImageView />
               </ProtectedRoute>
             }
           />
