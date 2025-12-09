@@ -1,6 +1,7 @@
 """
 Bulk Image Uploader - Desktop Application
 Upload images from Excel file to Django REST API with concurrent processing
+IMC Business Solutions - Professional Edition
 """
 
 import os
@@ -20,9 +21,25 @@ from queue import Queue
 class BulkImageUploader:
     def __init__(self, root):
         self.root = root
-        self.root.title("Bulk Image Uploader")
-        self.root.geometry("800x600")
+        self.root.title("IMC Bulk Image Uploader")
+        self.root.geometry("900x700")
         self.root.resizable(True, True)
+        
+        # Modern Professional Colors
+        self.colors = {
+            'primary': '#0078D4',
+            'secondary': '#106EBE',
+            'dark': '#1F1F1F',
+            'light_gray': '#8A8A8A',
+            'bg': '#FFFFFF',
+            'secondary_bg': '#F3F2F1',
+            'success': '#107C10',
+            'error': '#D13438',
+            'warning': '#F7630C',
+            'info': '#0078D4'
+        }
+        
+        self.root.configure(bg=self.colors['bg'])
         
         # Variables
         self.excel_file_path = tk.StringVar()
@@ -38,211 +55,325 @@ class BulkImageUploader:
         self.log_queue = Queue()
         
         # Setup UI
+        self.setup_styles()
         self.setup_ui()
+
+        # Start log processor AFTER UI is ready (give it 200ms to fully initialize)
+        self.root.after(200, self.process_log_queue)
         
-        # Start log processor
-        self.process_log_queue()
+        # Test logging to verify it works
+        self.root.after(300, lambda: self.log_message("Application started successfully", "SUCCESS"))
+        self.root.after(400, lambda: self.log_message("Ready to upload images", "INFO"))
         
-    def setup_ui(self):
-        """Create the main UI layout"""
-        # Configure styles
+    def setup_styles(self):
+        """Configure custom styles for ttk widgets"""
         style = ttk.Style()
         style.theme_use('clam')
         
-        # Main container with padding
-        main_frame = ttk.Frame(self.root, padding="20")
-        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        style.configure('TFrame', background=self.colors['bg'])
+        style.configure('TLabel', background=self.colors['bg'], foreground=self.colors['dark'])
+        style.configure('TLabelframe', background=self.colors['bg'], foreground=self.colors['dark'], borderwidth=1, relief='solid')
+        style.configure('TLabelframe.Label', background=self.colors['bg'], foreground=self.colors['dark'], font=('Segoe UI', 10, 'bold'))
         
-        # Title with subtitle
-        title_frame = ttk.Frame(main_frame)
-        title_frame.grid(row=0, column=0, columnspan=5, pady=(0, 15))
+        style.configure('Primary.TButton',
+                       background=self.colors['primary'],
+                       foreground='white',
+                       borderwidth=0,
+                       focuscolor='none',
+                       font=('Segoe UI', 10, 'bold'),
+                       padding=(20, 10))
+        style.map('Primary.TButton',
+                 background=[('active', self.colors['secondary']), ('pressed', self.colors['primary'])])
         
-        title_label = ttk.Label(
-            title_frame, 
-            text="Bulk Image Uploader Pro", 
-            font=("Segoe UI", 20, "bold"),
-            foreground="#2c3e50"
+        style.configure('Secondary.TButton',
+                       background=self.colors['secondary_bg'],
+                       foreground=self.colors['dark'],
+                       borderwidth=1,
+                       focuscolor='none',
+                       font=('Segoe UI', 9),
+                       padding=(12, 8))
+        style.map('Secondary.TButton',
+                 background=[('active', '#E1DFDD'), ('pressed', self.colors['secondary_bg'])],
+                 foreground=[('active', self.colors['dark'])])
+        
+        style.configure('TEntry',
+                       fieldbackground='white',
+                       borderwidth=1,
+                       relief='solid')
+        
+        style.configure('Modern.Horizontal.TProgressbar',
+                       troughcolor='#E1E1E1',
+                       background=self.colors['primary'],
+                       borderwidth=0,
+                       thickness=20)
+        
+    def setup_ui(self):
+        """Create the main UI layout"""
+        # Create a scrollable area: container -> canvas -> main_frame
+        container = ttk.Frame(self.root)
+        container.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+
+        # Vertical scrollbar and canvas for scrollable page
+        self.canvas = tk.Canvas(container, bg=self.colors['bg'], highlightthickness=0)
+        v_scroll = ttk.Scrollbar(container, orient=tk.VERTICAL, command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=v_scroll.set)
+
+        v_scroll.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        self.canvas.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+
+        # Put main_frame inside the canvas so the whole UI can scroll
+        main_frame = ttk.Frame(self.canvas, padding="25")
+        self.canvas_window = self.canvas.create_window((0, 0), window=main_frame, anchor='nw')
+        
+        # Header Section
+        header_frame = tk.Frame(main_frame, bg=self.colors['bg'])
+        header_frame.grid(row=0, column=0, columnspan=5, sticky=(tk.W, tk.E), pady=(0, 25))
+        
+        title_label = tk.Label(
+            header_frame,
+            text="Bulk Image Uploader",
+            font=("Segoe UI", 24, "bold"),
+            fg=self.colors['dark'],
+            bg=self.colors['bg']
         )
-        title_label.pack()
+        title_label.pack(anchor='w')
         
-        subtitle_label = ttk.Label(
-            title_frame,
-            text="Concurrent Multi-threaded Upload System",
-            font=("Segoe UI", 9),
-            foreground="#7f8c8d"
+        subtitle_label = tk.Label(
+            header_frame,
+            text="Concurrent multi-threaded upload system for efficient batch processing",
+            font=("Segoe UI", 10),
+            fg=self.colors['light_gray'],
+            bg=self.colors['bg']
         )
-        subtitle_label.pack()
+        subtitle_label.pack(anchor='w', pady=(5, 0))
         
         # Configuration Section
-        config_frame = ttk.LabelFrame(main_frame, text="Configuration", padding="15")
-        config_frame.grid(row=1, column=0, columnspan=5, sticky=(tk.W, tk.E), pady=(0, 15))
+        config_frame = ttk.LabelFrame(main_frame, text="Configuration", padding="20")
+        config_frame.grid(row=1, column=0, columnspan=5, sticky=(tk.W, tk.E), pady=(0, 20))
         
-        # API Endpoint
-        ttk.Label(config_frame, text="API Endpoint:", font=("Arial", 10, "bold")).grid(
-            row=0, column=0, sticky=tk.W, pady=5, padx=(0, 10)
-        )
-        api_entry = ttk.Entry(config_frame, textvariable=self.api_endpoint, width=45)
-        api_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), pady=5)
-
-        # File field name
-        ttk.Label(config_frame, text="Field Name:", font=("Arial", 10)).grid(
-            row=0, column=2, sticky=tk.W, padx=(15, 5), pady=5
-        )
-        file_field_entry = ttk.Entry(config_frame, textvariable=self.file_field_name, width=10)
-        file_field_entry.grid(row=0, column=3, sticky=tk.W, pady=5)
+        api_row = ttk.Frame(config_frame)
+        api_row.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 12))
         
-        # Max workers (concurrent threads)
-        ttk.Label(config_frame, text="Threads:", font=("Arial", 10)).grid(
-            row=0, column=4, sticky=tk.W, padx=(15, 5), pady=5
-        )
+        ttk.Label(api_row, text="API Endpoint:", font=("Segoe UI", 10, "bold")).pack(side=tk.LEFT, padx=(0, 10))
+        api_entry = ttk.Entry(api_row, textvariable=self.api_endpoint, width=50, font=("Segoe UI", 9))
+        api_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 15))
+        
+        ttk.Label(api_row, text="Field:", font=("Segoe UI", 9)).pack(side=tk.LEFT, padx=(0, 5))
+        file_field_entry = ttk.Entry(api_row, textvariable=self.file_field_name, width=12, font=("Segoe UI", 9))
+        file_field_entry.pack(side=tk.LEFT, padx=(0, 15))
+        
+        ttk.Label(api_row, text="Threads:", font=("Segoe UI", 9)).pack(side=tk.LEFT, padx=(0, 5))
         workers_spinbox = ttk.Spinbox(
-            config_frame, 
-            from_=1, 
-            to=20, 
+            api_row,
+            from_=1,
+            to=20,
             textvariable=self.max_workers,
-            width=5,
-            state='readonly'
+            width=6,
+            state='readonly',
+            font=("Segoe UI", 9)
         )
-        workers_spinbox.grid(row=0, column=5, sticky=tk.W, pady=5)
+        workers_spinbox.pack(side=tk.LEFT)
+        
+        config_frame.columnconfigure(0, weight=1)
         
         # File Selection Section
-        file_frame = ttk.LabelFrame(main_frame, text="Excel File", padding="15")
-        file_frame.grid(row=2, column=0, columnspan=5, sticky=(tk.W, tk.E), pady=(0, 15))
+        file_frame = ttk.LabelFrame(main_frame, text="Excel File Selection", padding="20")
+        file_frame.grid(row=2, column=0, columnspan=5, sticky=(tk.W, tk.E), pady=(0, 20))
         
-        file_entry = ttk.Entry(file_frame, textvariable=self.excel_file_path, width=60)
-        file_entry.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=5, padx=(0, 10))
+        file_row = ttk.Frame(file_frame)
+        file_row.pack(fill=tk.X)
+        
+        file_entry = ttk.Entry(file_row, textvariable=self.excel_file_path, font=("Segoe UI", 9))
+        file_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
         
         select_btn = ttk.Button(
-            file_frame, 
-            text="📁 Browse", 
+            file_row,
+            text="Browse",
             command=self.select_file,
-            width=12
+            style='Secondary.TButton'
         )
-        select_btn.grid(row=0, column=1, pady=5)
+        select_btn.pack(side=tk.LEFT)
         
-        # Control Buttons
-        control_frame = ttk.Frame(main_frame)
-        control_frame.grid(row=3, column=0, columnspan=5, pady=(0, 15))
+        # Control Buttons Section
+        control_frame = tk.Frame(main_frame, bg=self.colors['bg'])
+        control_frame.grid(row=3, column=0, columnspan=5, pady=(0, 25))
         
         self.upload_btn = ttk.Button(
-            control_frame, 
-            text="▶ Start Upload", 
+            control_frame,
+            text="Start Upload",
             command=self.start_upload,
             state=tk.DISABLED,
-            width=15
+            style='Primary.TButton'
         )
-        self.upload_btn.pack(side=tk.LEFT, padx=5)
+        self.upload_btn.pack(side=tk.LEFT, padx=(0, 10))
         
         self.pause_btn = ttk.Button(
             control_frame,
-            text="⏸ Pause",
+            text="Pause",
             command=self.toggle_pause,
             state=tk.DISABLED,
-            width=12
+            style='Secondary.TButton'
         )
-        self.pause_btn.pack(side=tk.LEFT, padx=5)
+        self.pause_btn.pack(side=tk.LEFT, padx=(0, 10))
         
         self.stop_btn = ttk.Button(
             control_frame,
-            text="⏹ Stop",
+            text="Stop",
             command=self.stop_upload,
             state=tk.DISABLED,
-            width=12
+            style='Secondary.TButton'
         )
-        self.stop_btn.pack(side=tk.LEFT, padx=5)
-        
-        config_frame.columnconfigure(1, weight=1)
-        file_frame.columnconfigure(0, weight=1)
+        self.stop_btn.pack(side=tk.LEFT)
         
         # Progress Section
-        progress_frame = ttk.LabelFrame(main_frame, text="Upload Progress", padding="15")
-        progress_frame.grid(row=4, column=0, columnspan=5, sticky=(tk.W, tk.E), pady=(0, 15))
+        progress_frame = ttk.LabelFrame(main_frame, text="Upload Progress", padding="20")
+        progress_frame.grid(row=4, column=0, columnspan=5, sticky=(tk.W, tk.E), pady=(0, 20))
         
-        # Progress info row
         info_row = ttk.Frame(progress_frame)
-        info_row.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 8))
+        info_row.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         
-        self.progress_label = ttk.Label(
-            info_row, 
-            text="Ready to upload", 
-            font=("Segoe UI", 9)
+        self.progress_label = tk.Label(
+            info_row,
+            text="Ready to upload",
+            font=("Segoe UI", 10),
+            fg=self.colors['dark'],
+            bg=self.colors['bg']
         )
         self.progress_label.pack(side=tk.LEFT)
         
-        self.speed_label = ttk.Label(
+        self.speed_label = tk.Label(
             info_row,
             text="",
-            font=("Segoe UI", 9),
-            foreground="#27ae60"
+            font=("Segoe UI", 10, "bold"),
+            fg=self.colors['primary'],
+            bg=self.colors['bg']
         )
         self.speed_label.pack(side=tk.RIGHT)
         
-        # Progress Bar
         self.progress_bar = ttk.Progressbar(
-            progress_frame, 
-            mode='determinate', 
-            length=800
+            progress_frame,
+            mode='determinate',
+            length=800,
+            style='Modern.Horizontal.TProgressbar'
         )
-        self.progress_bar.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 8))
+        self.progress_bar.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         
-        # Stats row
         stats_row = ttk.Frame(progress_frame)
         stats_row.grid(row=2, column=0, sticky=(tk.W, tk.E))
         
-        self.status_label = ttk.Label(
-            stats_row, 
-            text="✓ Success: 0 | ✗ Failed: 0 | ⏱ Time: 0s", 
+        self.status_label = tk.Label(
+            stats_row,
+            text="✓ Success: 0 | ✗ Failed: 0 | ⏱ Time: 0s",
             font=("Segoe UI", 10, "bold"),
-            foreground="#2c3e50"
+            fg=self.colors['dark'],
+            bg=self.colors['bg']
         )
         self.status_label.pack(side=tk.LEFT)
         
-        self.eta_label = ttk.Label(
+        self.eta_label = tk.Label(
             stats_row,
             text="",
             font=("Segoe UI", 9),
-            foreground="#95a5a6"
+            fg=self.colors['light_gray'],
+            bg=self.colors['bg']
         )
         self.eta_label.pack(side=tk.RIGHT)
         
         progress_frame.columnconfigure(0, weight=1)
         
         # Log Section
-        log_frame = ttk.LabelFrame(main_frame, text="Upload Log", padding="15")
-        log_frame.grid(row=5, column=0, columnspan=5, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 0))
+        # log_frame = ttk.LabelFrame(main_frame, text="Upload Log", padding="20")
+        log_frame = ttk.LabelFrame(main_frame, text="Upload Log", padding=20)   # 20 px on all sides
+        log_frame.grid(row=15, column=0, columnspan=5, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 15))
         
+        
+
         # Scrolled Text for logs
         self.log_text = scrolledtext.ScrolledText(
-            log_frame, 
-            height=18, 
+            log_frame,
+            height=15,
             width=100,
             font=("Consolas", 9),
-            state=tk.DISABLED,
-            background="#f8f9fa",
-            foreground="#2c3e50"
+            wrap=tk.WORD,
+            background='white',
+            foreground=self.colors['dark'],
+            borderwidth=1,
+            relief='solid'
         )
         self.log_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         
         # Configure tags for colored logs
-        self.log_text.tag_config("INFO", foreground="#3498db")
-        self.log_text.tag_config("SUCCESS", foreground="#27ae60", font=("Consolas", 9, "bold"))
-        self.log_text.tag_config("ERROR", foreground="#e74c3c", font=("Consolas", 9, "bold"))
-        self.log_text.tag_config("WARNING", foreground="#f39c12")
-        self.log_text.tag_config("DEBUG", foreground="#95a5a6")
+        self.log_text.tag_config("INFO", foreground=self.colors['info'])
+        self.log_text.tag_config("SUCCESS", foreground=self.colors['success'], font=("Consolas", 9, "bold"))
+        self.log_text.tag_config("ERROR", foreground=self.colors['error'], font=("Consolas", 9, "bold"))
+        self.log_text.tag_config("WARNING", foreground=self.colors['warning'])
+        self.log_text.tag_config("DEBUG", foreground=self.colors['light_gray'])
+        
+        log_frame.columnconfigure(0, weight=1)
+        log_frame.rowconfigure(0, weight=1)
+        
+        # Footer
+        footer_frame = tk.Frame(main_frame, bg=self.colors['bg'])
+        footer_frame.grid(row=6, column=0, columnspan=5, sticky=(tk.W, tk.E), pady=(10, 0))
+        
+        footer_label = tk.Label(
+            footer_frame,
+            text="Professional Upload System v2.0",
+            font=("Segoe UI", 8),
+            fg=self.colors['light_gray'],
+            bg=self.colors['bg']
+        )
+        footer_label.pack()
         
         # Configure grid weights for responsive layout
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
-        main_frame.columnconfigure(1, weight=1)
+        # Ensure the canvas container expands with the root
+        try:
+            container.columnconfigure(0, weight=1)
+            container.rowconfigure(0, weight=1)
+        except Exception:
+            pass
+        main_frame.columnconfigure(0, weight=1)
         main_frame.rowconfigure(5, weight=1)
-        log_frame.columnconfigure(0, weight=1)
-        log_frame.rowconfigure(0, weight=1)
+
+        # Keep canvas and window size in sync and enable mouse-wheel scrolling
+        def _on_frame_configure(event):
+            try:
+                self.canvas.configure(scrollregion=self.canvas.bbox('all'))
+            except Exception:
+                pass
+
+        def _on_canvas_configure(event):
+            try:
+                self.canvas.itemconfig(self.canvas_window, width=event.width)
+            except Exception:
+                pass
+
+        def _on_mousewheel(event):
+            try:
+                if event.delta:
+                    self.canvas.yview_scroll(-1 * (event.delta // 120), 'units')
+                else:
+                    if event.num == 4:
+                        self.canvas.yview_scroll(-1, 'units')
+                    elif event.num == 5:
+                        self.canvas.yview_scroll(1, 'units')
+            except Exception:
+                pass
+
+        main_frame.bind('<Configure>', _on_frame_configure)
+        self.canvas.bind('<Configure>', _on_canvas_configure)
+        self.canvas.bind_all('<MouseWheel>', _on_mousewheel)
+        # Optional Linux bindings for scroll wheel
+        self.canvas.bind_all('<Button-4>', _on_mousewheel)
+        self.canvas.bind_all('<Button-5>', _on_mousewheel)
         
     def select_file(self):
         """Open file dialog to select Excel file"""
         file_path = filedialog.askopenfilename(
             title="Select Excel File",
-            filetypes=[("Excel Files", "*.xlsx"), ("All Files", "*.*")]
+            filetypes=[("Excel Files", "*.xlsx *.xls"), ("All Files", "*.*")]
         )
         
         if file_path:
@@ -252,24 +383,51 @@ class BulkImageUploader:
             
     def log_message(self, message, level="INFO"):
         """Add message to log queue for thread-safe logging"""
-        self.log_queue.put((message, level))
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        self.log_queue.put((timestamp, message, level))
     
     def process_log_queue(self):
         """Process log messages from queue (thread-safe)"""
+        if not hasattr(self, 'log_text') or not self.log_text.winfo_exists():
+            # Widget doesn't exist yet, try again later
+            self.root.after(100, self.process_log_queue)
+            return
+            
         try:
-            while not self.log_queue.empty():
-                message, level = self.log_queue.get_nowait()
-                timestamp = datetime.now().strftime("%H:%M:%S")
-                log_entry = f"[{timestamp}] [{level}] {message}\n"
-                
-                self.log_text.config(state=tk.NORMAL)
-                self.log_text.insert(tk.END, log_entry, level)
-                self.log_text.see(tk.END)
-                self.log_text.config(state=tk.DISABLED)
-        except:
-            pass
+            processed = 0
+            # Process up to 50 messages per cycle to avoid UI blocking
+            while not self.log_queue.empty() and processed < 50:
+                try:
+                    timestamp, message, level = self.log_queue.get_nowait()
+                    log_entry = f"[{timestamp}] [{level}] {message}\n"
+                    
+                    # Enable widget for editing
+                    self.log_text.config(state=tk.NORMAL)
+                    
+                    # Insert with appropriate tag
+                    self.log_text.insert(tk.END, log_entry, level)
+                    
+                    # Auto-scroll to bottom
+                    self.log_text.see(tk.END)
+                    
+                    # Force update to ensure text appears immediately
+                    self.log_text.update_idletasks()
+                    
+                    # Disable widget to prevent user editing
+                    self.log_text.config(state=tk.DISABLED)
+                    
+                    processed += 1
+                    
+                except Exception as insert_error:
+                    # If insertion fails, just skip this message
+                    print(f"Failed to insert log: {insert_error}")
+                    break
+                    
+        except Exception as e:
+            # Print error but don't crash
+            print(f"Log processing error: {e}")
         
-        # Schedule next check
+        # Schedule next check (100ms interval)
         self.root.after(100, self.process_log_queue)
         
     def start_upload(self):
@@ -287,7 +445,7 @@ class BulkImageUploader:
             return
         
         # Update UI state
-        self.upload_btn.config(state=tk.DISABLED, text="⏳ Uploading...")
+        self.upload_btn.config(state=tk.DISABLED, text="Uploading...")
         self.pause_btn.config(state=tk.NORMAL)
         self.stop_btn.config(state=tk.NORMAL)
         self.is_uploading = True
@@ -296,7 +454,12 @@ class BulkImageUploader:
         self.fail_count = 0
         self.start_time = time.time()
         
-        # Start upload in separate thread to prevent UI freeze
+        # Clear log
+        self.log_text.config(state=tk.NORMAL)
+        self.log_text.delete(1.0, tk.END)
+        self.log_text.config(state=tk.DISABLED)
+        
+        # Start upload in separate thread
         upload_thread = threading.Thread(target=self.process_upload, daemon=True)
         upload_thread.start()
     
@@ -304,10 +467,10 @@ class BulkImageUploader:
         """Toggle pause state"""
         self.is_paused = not self.is_paused
         if self.is_paused:
-            self.pause_btn.config(text="▶ Resume")
+            self.pause_btn.config(text="Resume")
             self.log_message("Upload paused by user", "WARNING")
         else:
-            self.pause_btn.config(text="⏸ Pause")
+            self.pause_btn.config(text="Pause")
             self.log_message("Upload resumed", "INFO")
     
     def stop_upload(self):
@@ -323,15 +486,18 @@ class BulkImageUploader:
         """Main upload processing logic with concurrent execution"""
         try:
             # Read Excel file
-            self.log_message("📖 Reading Excel file...", "INFO")
+            self.log_message("Reading Excel file...", "INFO")
             df = pd.read_excel(self.excel_file_path.get())
             
             # Validate required columns
-            required_columns = ['serial_number', 'image_path', 'name', 'description']
+            # Only the serial_number and image_path are required; name and description are optional
+            required_columns = ['serial_number', 'image_path']
             missing_columns = [col for col in required_columns if col not in df.columns]
             
             if missing_columns:
-                error_msg = f"Missing required columns: {', '.join(missing_columns)}"
+                error_msg = (
+                    f"Missing required columns: {', '.join(missing_columns)}. "
+                    "Only 'serial_number' and 'image_path' are required; 'name' and 'description' are optional.")
                 self.log_message(error_msg, "ERROR")
                 messagebox.showerror("Invalid Excel File", error_msg)
                 self.reset_upload_state()
@@ -343,7 +509,8 @@ class BulkImageUploader:
             
             total_rows = len(df)
             workers = self.max_workers.get()
-            self.log_message(f"🚀 Starting concurrent upload: {total_rows} rows, {workers} threads", "INFO")
+            self.log_message(f"Starting concurrent upload: {total_rows} rows, {workers} threads", "INFO")
+            self.log_message("=" * 80, "DEBUG")
             
             # Prepare tasks
             tasks = []
@@ -351,8 +518,13 @@ class BulkImageUploader:
                 image_path = str(row['image_path']).strip()
                 image_path = os.path.expanduser(image_path)
                 image_path = os.path.normpath(image_path)
-                name = str(row['name']) if pd.notna(row['name']) else ''
-                description = str(row['description']) if pd.notna(row['description']) else ''
+                # Name & description are optional; use them only if present in the DataFrame
+                name = ''
+                description = ''
+                if 'name' in df.columns and pd.notna(row.get('name')):
+                    name = str(row['name'])
+                if 'description' in df.columns and pd.notna(row.get('description')):
+                    description = str(row['description'])
                 serial_number = row['serial_number']
                 
                 tasks.append({
@@ -361,7 +533,7 @@ class BulkImageUploader:
                     'name': name,
                     'description': description,
                     'serial_number': serial_number,
-                    'row_num': index + 1
+                    'row_num': index + 2  # +2 because Excel row 1 is header
                 })
             
             # Process with ThreadPoolExecutor
@@ -412,6 +584,9 @@ class BulkImageUploader:
             self.executor = None
             
             if self.is_uploading:
+                self.log_message("=" * 80, "DEBUG")
+                self.log_message("Upload process completed", "INFO")
+                
                 # Save updated Excel file
                 self.save_updated_excel(df)
                 
@@ -437,42 +612,31 @@ class BulkImageUploader:
             
             # Check if file exists
             if not os.path.exists(image_path):
-                self.log_message(f"Row {row_num}: File not found - {image_path}", "ERROR")
+                self.log_message(f"Row {row_num}: ✗ File not found - {image_path}", "ERROR")
                 return {'success': False, 'error': 'file not found'}
             
             # Upload image
-            self.log_message(f"Row {row_num}: Uploading {os.path.basename(image_path)}...", "INFO")
+            self.log_message(f"Row {row_num}: Uploading '{os.path.basename(image_path)}'...", "INFO")
             result = self.upload_image(image_path, name, description)
             
             if result['success']:
-                self.log_message(f"Row {row_num}: ✓ Success", "SUCCESS")
+                self.log_message(f"Row {row_num}: ✓ Upload successful - {result['url']}", "SUCCESS")
             else:
-                self.log_message(f"Row {row_num}: ✗ Failed - {result.get('error', 'unknown')}", "ERROR")
+                self.log_message(f"Row {row_num}: ✗ Upload failed - {result.get('error', 'unknown')}", "ERROR")
             
             return result
             
         except Exception as e:
-            self.log_message(f"Row {row_num}: Exception - {str(e)}", "ERROR")
+            self.log_message(f"Row {row_num}: ✗ Exception - {str(e)}", "ERROR")
             return {'success': False, 'error': str(e)}
     
     def upload_image(self, image_path, name, description):
-        """
-        Upload image to Django API endpoint
-        
-        Args:
-            image_path: Local path to image file
-            name: Name from Excel
-            description: Description from Excel
-            
-        Returns:
-            dict: {'success': bool, 'url': str} or {'success': False, 'error': str}
-        """
+        """Upload image to Django API endpoint"""
         try:
             # Prepare the multipart form data
             with open(image_path, 'rb') as image_file:
-                # Detect mimetype (e.g., 'image/png', 'image/jpeg')
+                # Detect mimetype
                 mimetype = mimetypes.guess_type(image_path)[0] or 'application/octet-stream'
-                # Use key 'image' by default; some servers expect that key
                 field_name = self.file_field_name.get().strip() or 'image'
                 files = {
                     field_name: (os.path.basename(image_path), image_file, mimetype)
@@ -483,7 +647,6 @@ class BulkImageUploader:
                 }
                 
                 # Make POST request
-                self.log_message(f"POST {self.api_endpoint.get()} file={os.path.basename(image_path)} type={mimetype}", "DEBUG")
                 response = requests.post(
                     self.api_endpoint.get(),
                     files=files,
@@ -498,8 +661,6 @@ class BulkImageUploader:
                     result = None
 
                 if response.status_code == 200 or response.status_code == 201:
-                    # If we have JSON, try to get the URL
-                    
                     # Handle different response formats
                     if isinstance(result, dict) and 'url' in result:
                         return {'success': True, 'url': result['url']}
@@ -508,15 +669,13 @@ class BulkImageUploader:
                     else:
                         return {'success': False, 'error': 'URL not found in response'}
                 else:
-                    # Try to parse structured error message if present
-                    err_text = response.text
+                    err_text = response.text[:200]  # Limit error text length
                     if isinstance(result, dict) and 'error' in result:
                         err_text = result.get('error')
-                    self.log_message(f"HTTP {response.status_code}: {err_text}", "DEBUG")
                     return {'success': False, 'error': f'HTTP {response.status_code}: {err_text}'}
                     
         except requests.exceptions.Timeout:
-            return {'success': False, 'error': 'Request timeout'}
+            return {'success': False, 'error': 'Request timeout (30s)'}
         except requests.exceptions.ConnectionError:
             return {'success': False, 'error': 'Connection error - check API endpoint'}
         except Exception as e:
@@ -552,8 +711,8 @@ class BulkImageUploader:
         eta = remaining / speed if speed > 0 else 0
         
         # Update labels
-        self.progress_label.config(text=f"📤 Uploading: {current} of {total} ({progress_percentage:.1f}%)")
-        self.speed_label.config(text=f"⚡ {speed:.2f} img/sec")
+        self.progress_label.config(text=f"Uploading: {current} of {total} ({progress_percentage:.1f}%)")
+        self.speed_label.config(text=f"{speed:.2f} images/sec")
         
         if eta > 0:
             eta_mins = int(eta / 60)
@@ -579,12 +738,12 @@ class BulkImageUploader:
         avg_speed = total / elapsed if elapsed > 0 else 0
         
         message = (
-            f"🎉 Upload Complete!\n\n"
+            f"Upload Complete!\n\n"
             f"✓ Successful uploads: {self.success_count}\n"
             f"✗ Failed uploads: {self.fail_count}\n"
             f"⏱ Total time: {mins}m {secs}s\n"
-            f"⚡ Average speed: {avg_speed:.2f} img/sec\n\n"
-            f"📄 Updated file saved to:\n{getattr(self, 'updated_file_path', 'N/A')}"
+            f"⚡ Average speed: {avg_speed:.2f} images/sec\n\n"
+            f"Updated file saved to:\n{getattr(self, 'updated_file_path', 'N/A')}"
         )
         messagebox.showinfo("Upload Complete", message)
         
@@ -592,15 +751,15 @@ class BulkImageUploader:
         """Reset upload state and enable button"""
         self.is_uploading = False
         self.is_paused = False
-        self.upload_btn.config(state=tk.NORMAL, text="▶ Start Upload")
-        self.pause_btn.config(state=tk.DISABLED, text="⏸ Pause")
+        self.upload_btn.config(state=tk.NORMAL, text="Start Upload")
+        self.pause_btn.config(state=tk.DISABLED, text="Pause")
         self.stop_btn.config(state=tk.DISABLED)
         
         if self.start_time:
             elapsed = time.time() - self.start_time
             mins = int(elapsed / 60)
             secs = int(elapsed % 60)
-            self.progress_label.config(text=f"✓ Upload completed in {mins}m {secs}s")
+            self.progress_label.config(text=f"Upload completed in {mins}m {secs}s")
         else:
             self.progress_label.config(text="Ready to upload")
 
