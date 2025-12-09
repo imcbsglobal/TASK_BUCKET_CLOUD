@@ -3,8 +3,8 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const AuthContext = createContext(null);
 
 // Hardcoded credentials
-const HARDCODED_USERNAME = 'admin';
-const HARDCODED_PASSWORD = 'admin123';
+const HARDCODED_USERNAME = 'imcbs';
+const HARDCODED_PASSWORD = 'imcbs';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);

@@ -764,8 +764,220 @@ class BulkImageUploader:
             self.progress_label.config(text="Ready to upload")
 
 
+# def main():
+#     """Main entry point"""
+#     root = tk.Tk()
+
+#     # Pre-login: hide the main window until the user authenticates
+#     root.withdraw()
+
+#     def show_login_dialog(parent):
+#         """Show a modal login dialog and return True if credentials are valid.
+
+#         This dialog uses a hardcoded username/password as requested:
+#         username: 'imcbs' and password: 'imcbs'.
+#         """
+#         login_win = tk.Toplevel(parent)
+#         login_win.title("Login")
+#         login_win.resizable(False, False)
+#         # keep standard decorations; '-toolwindow' hides maximize/restore which may cause issues
+#         # login_win.attributes('-toolwindow', True)
+#         login_win.transient(parent)
+#         login_win.grab_set()
+
+#         # Make sure the dialog is visible and focused
+#         try:
+#             login_win.lift()
+#             login_win.focus_force()
+#             login_win.wait_visibility()
+#         except Exception:
+#             pass
+
+#         width = 380
+#         height = 150
+#         screen_w = parent.winfo_screenwidth()
+#         screen_h = parent.winfo_screenheight()
+#         x = int((screen_w / 2) - (width / 2))
+#         y = int((screen_h / 2) - (height / 2))
+#         login_win.geometry(f"{width}x{height}+{x}+{y}")
+
+#         frame = ttk.Frame(login_win, padding=12)
+#         frame.pack(fill=tk.BOTH, expand=True)
+
+#         ttk.Label(frame, text="Username:", font=("Segoe UI", 10)).grid(row=0, column=0, sticky=tk.W, pady=(0, 6))
+#         user_var = tk.StringVar(value='')
+#         user_entry = ttk.Entry(frame, textvariable=user_var, width=30)
+#         user_entry.grid(row=0, column=1, pady=(0, 6))
+
+#         ttk.Label(frame, text="Password:", font=("Segoe UI", 10)).grid(row=1, column=0, sticky=tk.W)
+#         pass_var = tk.StringVar(value='')
+#         pass_entry = ttk.Entry(frame, textvariable=pass_var, width=30, show='*')
+#         pass_entry.grid(row=1, column=1)
+
+#         # Helper to display message and clear password
+#         def _fail_message():
+#             messagebox.showerror("Login Failed", "Incorrect username or password.")
+#             pass_var.set('')
+#             pass_entry.focus_set()
+
+#         # Attempt login with hard-coded credentials
+#         def _attempt_login():
+#             username = user_var.get().strip()
+#             password = pass_var.get()
+#             if username == 'imcbs' and password == 'imcbs':
+#                 login_win.user_authenticated = True
+#                 login_win.destroy()
+#             else:
+#                 login_win.user_authenticated = False
+#                 _fail_message()
+
+#         # Cancel/close behavior
+#         def _cancel():
+#             login_win.user_authenticated = False
+#             login_win.destroy()
+
+#         # Handle window close button as cancel
+#         login_win.protocol("WM_DELETE_WINDOW", _cancel)
+
+#         # Buttons
+#         btn_frame = ttk.Frame(frame)
+#         btn_frame.grid(row=2, column=0, columnspan=2, pady=(12, 0))
+#         login_btn = ttk.Button(btn_frame, text="Login", command=_attempt_login, style='Primary.TButton')
+#         login_btn.pack(side=tk.LEFT, padx=(0, 8))
+#         cancel_btn = ttk.Button(btn_frame, text="Cancel", command=_cancel, style='Secondary.TButton')
+#         cancel_btn.pack(side=tk.LEFT)
+
+#         # Bind Enter to login
+#         login_win.bind('<Return>', lambda e: _attempt_login())
+
+#         # Focus username first
+#         user_entry.focus_set()
+
+#         print("Login dialog shown")
+#         parent.wait_window(login_win)
+#         result = getattr(login_win, 'user_authenticated', False)
+#         print(f"Login dialog closed; authenticated={result}")
+#         return result
+
+#     # Show the login dialog, and if successful show the app else exit
+#     if not show_login_dialog(root):
+#         root.destroy()
+#         return
+
+#     # Show the main window now that the user is authenticated
+#     root.deiconify()
+#     app = BulkImageUploader(root)
+#     root.mainloop()
+
+
+# if __name__ == "__main__":
+#     main()
+
+def show_login_dialog():
+    """Show a modal login dialog and return True if credentials are valid.
+    
+    This dialog uses a hardcoded username/password:
+    username: 'imcbs' and password: 'imcbs'.
+    """
+    login_root = tk.Tk()
+    login_root.title("IMC Bulk Image Uploader - Login")
+    login_root.resizable(False, False)
+    
+    width = 400
+    height = 180
+    screen_w = login_root.winfo_screenwidth()
+    screen_h = login_root.winfo_screenheight()
+    x = int((screen_w / 2) - (width / 2))
+    y = int((screen_h / 2) - (height / 2))
+    login_root.geometry(f"{width}x{height}+{x}+{y}")
+    
+    # Style the login window
+    login_root.configure(bg='#FFFFFF')
+    
+    # Configure styles
+    style = ttk.Style()
+    style.theme_use('clam')
+    style.configure('Login.TFrame', background='#FFFFFF')
+    style.configure('Login.TLabel', background='#FFFFFF', foreground='#1F1F1F', font=('Segoe UI', 10))
+    style.configure('Login.TButton', font=('Segoe UI', 10))
+    
+    frame = ttk.Frame(login_root, padding=20, style='Login.TFrame')
+    frame.pack(fill=tk.BOTH, expand=True)
+    
+    # Title
+    title_label = tk.Label(
+        frame,
+        text="Please Login",
+        font=("Segoe UI", 14, "bold"),
+        fg='#0078D4',
+        bg='#FFFFFF'
+    )
+    title_label.grid(row=0, column=0, columnspan=2, pady=(0, 15))
+    
+    # Username
+    ttk.Label(frame, text="Username:", style='Login.TLabel').grid(row=1, column=0, sticky=tk.W, pady=(0, 10), padx=(0, 10))
+    user_var = tk.StringVar(value='')
+    user_entry = ttk.Entry(frame, textvariable=user_var, width=25, font=("Segoe UI", 10))
+    user_entry.grid(row=1, column=1, pady=(0, 10), sticky=tk.EW)
+    
+    # Password
+    ttk.Label(frame, text="Password:", style='Login.TLabel').grid(row=2, column=0, sticky=tk.W, padx=(0, 10))
+    pass_var = tk.StringVar(value='')
+    pass_entry = ttk.Entry(frame, textvariable=pass_var, width=25, show='●', font=("Segoe UI", 10))
+    pass_entry.grid(row=2, column=1, sticky=tk.EW)
+    
+    authenticated = [False]  # Use list to allow modification in nested function
+    
+    def attempt_login():
+        username = user_var.get().strip()
+        password = pass_var.get()
+        if username == 'imcbs' and password == 'imcbs':
+            authenticated[0] = True
+            login_root.destroy()
+        else:
+            messagebox.showerror("Login Failed", "Incorrect username or password.", parent=login_root)
+            pass_var.set('')
+            pass_entry.focus_set()
+    
+    def cancel_login():
+        authenticated[0] = False
+        login_root.destroy()
+    
+    # Handle window close
+    login_root.protocol("WM_DELETE_WINDOW", cancel_login)
+    
+    # Buttons
+    btn_frame = ttk.Frame(frame, style='Login.TFrame')
+    btn_frame.grid(row=3, column=0, columnspan=2, pady=(20, 0))
+    
+    login_btn = ttk.Button(btn_frame, text="Login", command=attempt_login)
+    login_btn.pack(side=tk.LEFT, padx=(0, 10))
+    
+    cancel_btn = ttk.Button(btn_frame, text="Cancel", command=cancel_login)
+    cancel_btn.pack(side=tk.LEFT)
+    
+    # Bind Enter key
+    login_root.bind('<Return>', lambda e: attempt_login())
+    
+    # Configure grid weights
+    frame.columnconfigure(1, weight=1)
+    
+    # Focus username
+    user_entry.focus_set()
+    
+    # Start the login window event loop
+    login_root.mainloop()
+    
+    return authenticated[0]
+
+
 def main():
     """Main entry point"""
+    # Show login dialog first
+    if not show_login_dialog():
+        return  # User cancelled or failed login
+    
+    # Create main application window
     root = tk.Tk()
     app = BulkImageUploader(root)
     root.mainloop()

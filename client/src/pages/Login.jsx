@@ -27,7 +27,7 @@ const Login = () => {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background select-none">
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10"></div>
         <div className="absolute top-20 left-20 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
@@ -63,7 +63,7 @@ const Login = () => {
                   className="form-input block w-full rounded-lg border border-purple-neon/30 bg-background p-3 pl-10 text-base placeholder:text-text-secondary focus:border-primary focus:ring-2 focus:ring-primary/50 text-text-primary transition-all"
                   id="email"
                   name="email"
-                  placeholder="admin"
+                  placeholder="username"
                   required
                   type="text"
                   value={email}
@@ -86,7 +86,7 @@ const Login = () => {
                   className="form-input block w-full rounded-lg border border-purple-neon/30 bg-background p-3 pl-10 text-base placeholder:text-text-secondary focus:border-primary focus:ring-2 focus:ring-primary/50 text-text-primary transition-all"
                   id="password"
                   name="password"
-                  placeholder="admin123"
+                  placeholder="password"
                   required
                   type="password"
                   value={password}
