@@ -22,7 +22,7 @@ const Login = () => {
     if (success) {
       navigate('/dashboard');
     } else {
-      setError('Invalid username or password. Try: admin / admin123');
+      setError('Invalid username or password.');
     }
   };
 

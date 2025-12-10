@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-m+x*(na22qg(rg+z7)cnc)n!hob_h5q^8)psiu2nqzejf*tf^&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1','gallery.imcbs.com']
 
 
 # Application definition
@@ -137,6 +137,7 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://gallery.imcbs.com"
 ]
 
 CORS_ALLOW_CREDENTIALS = True

@@ -116,6 +116,9 @@ Create a `.env` file in the client directory (optional):
 
 ```env
 VITE_API_BASE_URL=http://localhost:8000/api
+
+# Optional: API key for the backend. If not provided, the app will fall back to the default hard-coded key for development.
+VITE_API_KEY=imcbs-secret-key-2025
 ```
 
 If not set, the app defaults to `http://localhost:8000/api`.

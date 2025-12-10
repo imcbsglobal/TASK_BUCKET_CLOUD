@@ -10,8 +10,8 @@ const ApiDocs = () => {
     setTimeout(() => setCopiedEndpoint(null), 2000);
   };
 
-  const baseUrl = 'http://localhost:8000/api';
-  const apiKey = 'imcbs-secret-key-2025';
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+  const apiKey = import.meta.env.VITE_API_KEY || 'imcbs-secret-key-2025';
 
   const endpoints = [
     {
