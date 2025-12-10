@@ -38,7 +38,7 @@ const Login = () => {
         <div className="rounded-xl border border-purple-neon/30 bg-card/80 p-8 neon-glow backdrop-blur-xl">
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-yellow-neon to-purple-neon neon-glow">
-              <span className="text-background font-bold text-2xl">IMC</span>
+              <span className="text-background font-bold text-2xl"><img src="https://imcbs.com/assets/logo-icon-xaCOQk2X.png" alt="IMC" srcset="" /> </span>
             </div>
             <h1 className="text-3xl font-bold tracking-tighter gradient-text neon-text">Welcome Back</h1>
             <p className="mt-2 text-sm text-text-secondary">Sign in to IMC Cloud Bucket.</p>

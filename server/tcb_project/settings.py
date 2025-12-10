@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from corsheaders.defaults import default_headers
 
 
 # Load environment variables from .env file
@@ -57,7 +58,15 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # API Key authentication middleware
+    'tcb_project.middleware.APIKeyMiddleware',
 ]
+
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "x-api-key",
+]
+
 
 ROOT_URLCONF = 'tcb_project.urls'
 
@@ -175,3 +184,7 @@ else:
     }
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# API Authentication
+# Hardcoded API key for basic authentication
+API_KEY = 'imcbs-secret-key-2025'

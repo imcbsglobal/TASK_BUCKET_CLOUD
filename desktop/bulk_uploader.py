@@ -44,6 +44,7 @@ class BulkImageUploader:
         # Variables
         self.excel_file_path = tk.StringVar()
         self.api_endpoint = tk.StringVar(value="http://localhost:8000/api/upload/")
+        self.api_key = tk.StringVar(value="imcbs-secret-key-2025")
         self.file_field_name = tk.StringVar(value="image")
         self.max_workers = tk.IntVar(value=5)
         self.is_uploading = False
@@ -161,6 +162,11 @@ class BulkImageUploader:
         ttk.Label(api_row, text="Field:", font=("Segoe UI", 9)).pack(side=tk.LEFT, padx=(0, 5))
         file_field_entry = ttk.Entry(api_row, textvariable=self.file_field_name, width=12, font=("Segoe UI", 9))
         file_field_entry.pack(side=tk.LEFT, padx=(0, 15))
+        
+        # API Key
+        ttk.Label(api_row, text="API Key:", font=("Segoe UI", 9)).pack(side=tk.LEFT, padx=(0, 5))
+        api_key_entry = ttk.Entry(api_row, textvariable=self.api_key, width=28, font=("Segoe UI", 9))
+        api_key_entry.pack(side=tk.LEFT, padx=(0, 15))
         
         ttk.Label(api_row, text="Threads:", font=("Segoe UI", 9)).pack(side=tk.LEFT, padx=(0, 5))
         workers_spinbox = ttk.Spinbox(
@@ -646,11 +652,23 @@ class BulkImageUploader:
                     'description': description
                 }
                 
-                # Make POST request
+                # Make POST request with X-API-Key header
+                headers = {}
+                try:
+                    api_key = self.api_key.get().strip()
+                    if api_key:
+                        headers['X-API-Key'] = api_key
+                except Exception:
+                    # Fail silently if api_key isn't available or configured
+                    pass
+
+                # Avoid logging the header value; print presence instead
+                self.log_message(f"POST {self.api_endpoint.get()} file={os.path.basename(image_path)} (api_key_present={bool(headers.get('X-API-Key'))})", "DEBUG")
                 response = requests.post(
                     self.api_endpoint.get(),
                     files=files,
                     data=data,
+                    headers=headers,
                     timeout=30
                 )
                 

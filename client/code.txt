@@ -204,7 +204,7 @@
 </td>
 <td class="px-6 py-4 font-medium text-slate-900 dark:text-white">aurora-background.png</td>
 <td class="px-6 py-4 text-slate-500 dark:text-slate-400">Hero background for landing page</td>
-<td class="px-6 py-4 text-slate-500 dark:text-slate-400">2024-05-21</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">2025-05-21</td>
 <td class="px-6 py-4 text-right">
 <button class="inline-flex items-center justify-center p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400">
 <span class="material-symbols-outlined !text-xl">content_copy</span>
@@ -217,7 +217,7 @@
 </td>
 <td class="px-6 py-4 font-medium text-slate-900 dark:text-white">dashboard-v2.jpg</td>
 <td class="px-6 py-4 text-slate-500 dark:text-slate-400">Updated dashboard design</td>
-<td class="px-6 py-4 text-slate-500 dark:text-slate-400">2024-05-20</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">2025-05-20</td>
 <td class="px-6 py-4 text-right">
 <button class="inline-flex items-center justify-center p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400">
 <span class="material-symbols-outlined !text-xl">content_copy</span>
@@ -230,7 +230,7 @@
 </td>
 <td class="px-6 py-4 font-medium text-slate-900 dark:text-white">company_logo_green.svg</td>
 <td class="px-6 py-4 text-slate-500 dark:text-slate-400">-</td>
-<td class="px-6 py-4 text-slate-500 dark:text-slate-400">2024-05-19</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">2025-05-19</td>
 <td class="px-6 py-4 text-right">
 <button class="inline-flex items-center justify-center p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400">
 <span class="material-symbols-outlined !text-xl">content_copy</span>
@@ -676,7 +676,7 @@
 </div>
 <div>
 <p class="text-sm text-slate-500 dark:text-slate-400">Upload Date</p>
-<p class="text-base font-medium text-slate-900 dark:text-white">2024-05-21</p>
+<p class="text-base font-medium text-slate-900 dark:text-white">2025-05-21</p>
 </div>
 <div>
 <p class="text-sm text-slate-500 dark:text-slate-400">Custom Name</p>

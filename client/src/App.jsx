@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Gallery from './pages/Gallery';
 import ImageView from './pages/ImageView';
+import ApiDocs from './pages/ApiDocs';
 import './index.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -51,6 +52,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ImageView />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/api-docs"
+            element={
+              <ProtectedRoute>
+                <ApiDocs />
               </ProtectedRoute>
             }
           />

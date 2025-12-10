@@ -1,6 +1,6 @@
 # TaskBucketCloud - Image Upload API
 
-A simple Django REST API for uploading images to Cloudflare R2 bucket and retrieving image URLs. No authentication required.
+A simple Django REST API for uploading images to Cloudflare R2 bucket and retrieving image URLs. API Key authentication is now enabled (see Authentication section).
 
 ## Features
 
@@ -10,7 +10,7 @@ A simple Django REST API for uploading images to Cloudflare R2 bucket and retrie
 - ✅ Update image metadata (name, description)
 - ✅ Delete images from storage and database
 - ✅ Supported formats: JPG, JPEG, PNG, GIF, WEBP, BMP
-- ✅ No authentication required
+- ✅ API key authentication (X-API-Key header required for API requests)
 - ✅ CSRF protection disabled for API endpoints
 
 ## Prerequisites
@@ -75,6 +75,217 @@ python manage.py runserver
 The API will be available at `http://127.0.0.1:8000/`
 
 ## API Endpoints
+# API Key Authentication Guide
+
+## Overview
+
+TaskBucket Cloud now includes API key authentication for all API endpoints. This provides basic security for your image management API.
+
+## API Key
+
+**Hardcoded API Key:** `imcbs-secret-key-2025`
+
+This key must be included in the `X-API-Key` header for all API requests.
+
+## How to Use
+
+### cURL Examples
+
+#### 1. Upload Image
+```bash
+curl -X POST http://localhost:8000/api/upload/ \
+  -H "X-API-Key: imcbs-secret-key-2025" \
+  -F "image=@/path/to/your/image.jpg" \
+  -F "name=My Photo" \
+  -F "description=A beautiful sunset"
+```
+
+#### 2. List All Images
+```bash
+curl -X GET http://localhost:8000/api/list/ \
+  -H "X-API-Key: imcbs-secret-key-2025"
+```
+
+#### 3. Update Image Metadata
+```bash
+curl -X PUT http://localhost:8000/api/update/1/ \
+  -H "X-API-Key: imcbs-secret-key-2025" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Updated Title", "description": "New description"}'
+```
+
+#### 4. Delete Image
+```bash
+curl -X DELETE http://localhost:8000/api/delete/1/ \
+  -H "X-API-Key: imcbs-secret-key-2025"
+```
+
+### JavaScript/Fetch Example
+
+```javascript
+// Upload image
+const formData = new FormData();
+formData.append('image', fileInput.files[0]);
+formData.append('name', 'My Photo');
+formData.append('description', 'Description here');
+
+const response = await fetch('http://localhost:8000/api/upload/', {
+  method: 'POST',
+  headers: {
+    'X-API-Key': 'imcbs-secret-key-2025'
+  },
+  body: formData
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+### Python Requests Example
+
+```python
+import requests
+
+# API configuration
+API_BASE = 'http://localhost:8000/api'
+API_KEY = 'imcbs-secret-key-2025'
+
+headers = {
+    'X-API-Key': API_KEY
+}
+
+# Upload image
+with open('image.jpg', 'rb') as f:
+    files = {'image': f}
+    data = {'name': 'My Photo', 'description': 'A sunset'}
+    response = requests.post(f'{API_BASE}/upload/', 
+                            headers=headers, 
+                            files=files, 
+                            data=data)
+    print(response.json())
+
+# List images
+response = requests.get(f'{API_BASE}/list/', headers=headers)
+print(response.json())
+
+# Update image
+response = requests.put(f'{API_BASE}/update/1/', 
+                       headers=headers,
+                       json={'name': 'Updated Name'})
+print(response.json())
+
+# Delete image
+response = requests.delete(f'{API_BASE}/delete/1/', headers=headers)
+print(response.json())
+```
+
+## Error Responses
+
+### Missing API Key
+```json
+{
+  "success": false,
+  "error": "API key is required. Please provide X-API-Key header."
+}
+```
+**Status Code:** 401
+
+### Invalid API Key
+```json
+{
+  "success": false,
+  "error": "Invalid API key. Access denied."
+}
+```
+**Status Code:** 401
+
+## Accessing the Frontend API Documentation
+
+1. Start the frontend: `npm run dev` (in the `client` directory)
+2. Login to the application
+3. Click on **"API Docs"** in the sidebar
+4. View comprehensive documentation with:
+   - All endpoint details
+   - Request/response examples
+   - cURL commands (copy-to-clipboard enabled)
+   - Authentication instructions
+
+## Configuration
+
+### Changing the API Key
+
+To change the hardcoded API key:
+
+1. Open `server/tcb_project/settings.py`
+2. Find the `API_KEY` setting at the bottom:
+   ```python
+   API_KEY = 'imcbs-secret-key-2025'
+   ```
+3. Change to your desired key
+4. Update the frontend documentation in `client/src/pages/ApiDocs.jsx`:
+   ```javascript
+   const apiKey = 'your-new-api-key';
+   ```
+5. Restart both backend and frontend servers
+
+### Disabling API Key Authentication (Not Recommended)
+
+To disable API key authentication:
+
+1. Open `server/tcb_project/settings.py`
+2. Remove this line from `MIDDLEWARE`:
+   ```python
+   'tcb_project.middleware.APIKeyMiddleware',
+   ```
+3. Restart the backend server
+
+## Security Notes
+
+⚠️ **Important Security Considerations:**
+
+- This is a **basic** authentication mechanism suitable for development and testing
+- The API key is hardcoded and not environment-specific
+- For production use, consider:
+  - Using environment variables for the API key
+  - Implementing user-specific API keys with a database
+  - Adding rate limiting
+  - Using HTTPS/TLS encryption
+  - Implementing JWT tokens or OAuth2 for more robust authentication
+  - Adding API key rotation mechanisms
+
+## Testing with Postman
+
+1. Create a new request in Postman
+2. Set the method (GET, POST, PUT, DELETE)
+3. Enter the URL (e.g., `http://localhost:8000/api/list/`)
+4. Go to **Headers** tab
+5. Add header:
+   - Key: `X-API-Key`
+   - Value: `imcbs-secret-key-2025`
+6. For POST (upload), go to **Body** → **form-data**:
+   - Add `image` field (type: File)
+   - Add `name` field (type: Text)
+   - Add `description` field (type: Text)
+7. Send the request
+
+## Troubleshooting
+
+### CORS Issues
+If you encounter CORS errors, ensure:
+- Backend CORS settings allow the frontend origin
+- The `X-API-Key` header is included in `CORS_ALLOW_HEADERS` (already configured)
+
+### 401 Unauthorized
+- Check that the `X-API-Key` header is present
+- Verify the API key matches exactly (case-sensitive)
+- Ensure no extra spaces in the header value
+
+### Admin Panel Still Accessible
+The admin panel (`/admin/`) is exempt from API key authentication for convenience.
+
+## Support
+
+For more information, visit the **API Docs** page in the frontend application or check the backend `views.py` for endpoint implementation details.
 
 ### 1. Upload Image
 
@@ -155,9 +366,10 @@ print(response.json())
       "name": "Sunset Photo",
       "description": "Beautiful sunset at the beach",
       "size": 245678,
-      "uploaded_at": "2025-12-08T12:30:45.123456Z"
-    },
-    {
+  -H "X-API-Key: imcbs-secret-key-2025" \
+  -F "image=@/path/to/your/image.jpg" \
+  -F "name=Sunset Photo" \
+  -F "description=Beautiful sunset at the beach"
       "id": 2,
       "filename": "xyz789-uvw012.png",
       "url": "https://pub-xxxxxxxx.r2.dev/xyz789-uvw012.png",
@@ -171,7 +383,7 @@ print(response.json())
 }
 ```
 
-### 3. Update Image Metadata
+response = requests.post(url, files=files, data=data, headers={'X-API-Key': 'imcbs-secret-key-2025'})
 
 **Endpoint:** `PUT /api/update/<image_id>/`
 
@@ -266,7 +478,7 @@ print(response.json())
 {
   "success": false,
   "error": "Image with id 1 not found."
-}
+response = requests.put(url, json=data, headers={'X-API-Key': 'imcbs-secret-key-2025'})
 ```
 
 > **Note:** Deleting an image removes it from both the database and Cloudflare R2 storage. All references to the image URL will become invalid.
@@ -278,7 +490,8 @@ print(response.json())
 ### Upload Image
 
 1. Create a new POST request to `http://127.0.0.1:8000/api/upload/`
-2. Go to Body tab → select `form-data`
+2. Go to Headers tab → add header `X-API-Key: imcbs-secret-key-2025`
+3. Go to Body tab → select `form-data`
 3. Add key `image` and change type to `File`
 4. Choose an image file
 5. Click Send
