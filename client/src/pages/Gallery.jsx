@@ -1,21 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
-import { MdSearch, MdOpenInNew, MdContentCopy, MdVisibility, MdDelete } from 'react-icons/md';
+import { MdSearch, MdOpenInNew, MdContentCopy, MdVisibility, MdDelete, MdFilterList, MdArrowBack, MdArrowForward } from 'react-icons/md';
 import { useImages, useDeleteImage } from '../hooks/useImages';
 
 const Gallery = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [clientIdFilter, setClientIdFilter] = useState('');
+  const [sortBy, setSortBy] = useState('-uploaded_at');
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(20);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [imageToDelete, setImageToDelete] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Build query params
+  const queryParams = {
+    search: searchQuery,
+    client_id: clientIdFilter,
+    sort_by: sortBy,
+    page,
+    page_size: pageSize
+  };
 
   // React Query hooks
-  const { data: images = [], isLoading: loading } = useImages();
+  const { data, isLoading: loading } = useImages(queryParams);
   const deleteMutation = useDeleteImage();
+
+  const images = data?.images || [];
+  const pagination = data?.pagination || {};
+  const uniqueClientIds = [...new Set(images.map(img => img.client_id).filter(Boolean))];
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, clientIdFilter, sortBy]);
 
   const copyToClipboard = (url) => {
     navigator.clipboard.writeText(url);
@@ -42,14 +65,13 @@ const Gallery = () => {
     }
   };
 
-  const filteredImages = images.filter((image) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      (image.name && image.name.toLowerCase().includes(query)) ||
-      (image.original_filename && image.original_filename.toLowerCase().includes(query)) ||
-      (image.description && image.description.toLowerCase().includes(query))
-    );
-  });
+  const formatSize = (bytes) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  };
+
+  const filteredImages = images;
 
   return (
     <Layout>
@@ -69,22 +91,90 @@ const Gallery = () => {
       />
       <div className="mx-auto max-w-7xl mt-12 md:mt-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
-          <h1 className="gradient-text text-2xl sm:text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">
-            Image Gallery
-          </h1>
-          
-          <div className="flex items-center gap-4 w-full sm:w-auto">
-            <div className="relative w-full sm:w-64">
-              <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-xl sm:text-2xl" />
-              <input
-                className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-purple-neon/30 bg-card h-10 sm:h-11 placeholder:text-text-secondary p-3 text-sm sm:text-base font-normal leading-normal pl-10 sm:pl-11"
-                placeholder="Search images..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+          <div>
+            <h1 className="gradient-text text-2xl sm:text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">
+              Image Gallery
+            </h1>
+            {pagination.total_count !== undefined && (
+              <p className="text-text-secondary text-sm mt-2">
+                {pagination.total_count} total images
+              </p>
+            )}
           </div>
+          
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-purple-neon/30 hover:bg-card/90 transition-colors"
+          >
+            <MdFilterList className="text-xl" />
+            <span className="text-sm font-medium">Filters</span>
+          </button>
         </div>
+
+        {/* Filters Section */}
+        {showFilters && (
+          <div className="bg-card rounded-xl border border-purple-neon/30 p-4 sm:p-6 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Search */}
+              <div className="flex flex-col">
+                <label className="text-sm font-medium text-text-primary mb-2">Search</label>
+                <div className="relative">
+                  <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-xl" />
+                  <input
+                    className="form-input w-full rounded-lg text-text-primary focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-purple-neon/30 bg-background h-11 placeholder:text-text-secondary p-3 pl-10 text-sm"
+                    placeholder="Search by name, description..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* Client ID Filter */}
+              <div className="flex flex-col">
+                <label className="text-sm font-medium text-text-primary mb-2">Client ID</label>
+                <input
+                  className="form-input w-full rounded-lg text-text-primary focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-purple-neon/30 bg-background h-11 placeholder:text-text-secondary p-3 text-sm"
+                  placeholder="Filter by client ID..."
+                  value={clientIdFilter}
+                  onChange={(e) => setClientIdFilter(e.target.value.toUpperCase())}
+                />
+              </div>
+
+              {/* Sort By */}
+              <div className="flex flex-col">
+                <label className="text-sm font-medium text-text-primary mb-2">Sort By</label>
+                <select
+                  className="form-select w-full rounded-lg text-text-primary focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-purple-neon/30 bg-background h-11 p-3 text-sm"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  <option value="-uploaded_at">Newest First</option>
+                  <option value="uploaded_at">Oldest First</option>
+                  <option value="name">Name (A-Z)</option>
+                  <option value="-name">Name (Z-A)</option>
+                  <option value="-size">Size (Largest)</option>
+                  <option value="size">Size (Smallest)</option>
+                  <option value="client_id">Client ID (A-Z)</option>
+                  <option value="-client_id">Client ID (Z-A)</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Clear Filters Button */}
+            {(searchQuery || clientIdFilter || sortBy !== '-uploaded_at') && (
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setClientIdFilter('');
+                  setSortBy('-uploaded_at');
+                }}
+                className="mt-4 text-sm text-primary hover:underline"
+              >
+                Clear all filters
+              </button>
+            )}
+          </div>
+        )}
 
         {loading ? (
           <div className="text-center py-12 text-text-secondary">
@@ -161,6 +251,35 @@ const Gallery = () => {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {pagination.total_pages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-8">
+            <button
+              onClick={() => setPage(page - 1)}
+              disabled={!pagination.has_previous}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-purple-neon/30 hover:bg-card/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <MdArrowBack />
+              <span className="hidden sm:inline">Previous</span>
+            </button>
+            
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-text-secondary">
+                Page {pagination.page} of {pagination.total_pages}
+              </span>
+            </div>
+            
+            <button
+              onClick={() => setPage(page + 1)}
+              disabled={!pagination.has_next}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-purple-neon/30 hover:bg-card/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span className="hidden sm:inline">Next</span>
+              <MdArrowForward />
+            </button>
           </div>
         )}
       </div>

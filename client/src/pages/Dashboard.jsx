@@ -3,7 +3,7 @@ import { compressImage } from '../utils/compressImage';
 import Layout from '../components/Layout';
 import Toast from '../components/Toast';
 import { MdCloudUpload, MdContentCopy, MdCheckCircle, MdError } from 'react-icons/md';
-import { useImages, useUploadImage } from '../hooks/useImages';
+import { useImages, useUploadImage, useStats } from '../hooks/useImages';
 import { imageService } from '../services/api';
 
 const Dashboard = () => {
@@ -15,8 +15,11 @@ const Dashboard = () => {
   const [message, setMessage] = useState({ type: '', text: '' });
 
   // React Query hooks
-  const { data: images = [], isLoading: loading } = useImages();
+  const { data, isLoading: loading } = useImages({ page: 1, page_size: 5 });
+  const { data: stats } = useStats();
   const uploadMutation = useUploadImage();
+
+  const images = data?.images || [];
 
   // Validate client ID with debounce
   useEffect(() => {
@@ -136,6 +139,24 @@ const Dashboard = () => {
         onClose={() => setMessage({ type: '', text: '' })}
       />
       <div className="mx-auto max-w-4xl mt-12 md:mt-0">
+        {/* Statistics Cards */}
+        {stats && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div className="bg-card rounded-xl border border-purple-neon/30 p-4">
+              <p className="text-text-secondary text-sm mb-1">Total Images</p>
+              <p className="text-text-primary text-2xl font-bold">{stats.total_images}</p>
+            </div>
+            <div className="bg-card rounded-xl border border-purple-neon/30 p-4">
+              <p className="text-text-secondary text-sm mb-1">Total Size</p>
+              <p className="text-text-primary text-2xl font-bold">{formatSize(stats.total_size)}</p>
+            </div>
+            <div className="bg-card rounded-xl border border-purple-neon/30 p-4">
+              <p className="text-text-secondary text-sm mb-1">Unique Clients</p>
+              <p className="text-text-primary text-2xl font-bold">{stats.unique_clients}</p>
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-wrap justify-between gap-3 mb-6 sm:mb-8">
           <h1 className="gradient-text text-2xl sm:text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">
             Image Management Dashboard
@@ -276,6 +297,7 @@ const Dashboard = () => {
                     <tr>
                       <th className="px-3 sm:px-6 py-3 w-16 sm:w-24" scope="col">Preview</th>
                       <th className="px-3 sm:px-6 py-3" scope="col">Name</th>
+                      <th className="px-3 sm:px-6 py-3 hidden lg:table-cell" scope="col">Client ID</th>
                       <th className="px-3 sm:px-6 py-3 hidden md:table-cell" scope="col">Description</th>
                       <th className="px-3 sm:px-6 py-3 hidden sm:table-cell" scope="col">Size</th>
                       <th className="px-3 sm:px-6 py-3 hidden lg:table-cell" scope="col">Date</th>
@@ -283,7 +305,7 @@ const Dashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {images.slice(0, 5).map((image) => (
+                    {images.map((image) => (
                       <tr key={image.id} className="border-b border-purple-neon/20 hover:bg-primary/5 transition-colors">
                         <td className="px-3 sm:px-6 py-4">
                           <div
@@ -295,6 +317,11 @@ const Dashboard = () => {
                           <div className="max-w-[120px] sm:max-w-none truncate">
                             {image.name || image.original_filename}
                           </div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-4 text-text-secondary text-xs hidden lg:table-cell">
+                          <span className="px-2 py-1 rounded bg-primary/10 text-primary text-xs font-mono">
+                            {image.client_id}
+                          </span>
                         </td>
                         <td className="px-3 sm:px-6 py-4 text-text-secondary hidden md:table-cell">
                           <div className="max-w-[200px] truncate">
@@ -324,6 +351,34 @@ const Dashboard = () => {
             )}
           </div>
         </div>
+
+        {/* Client Statistics */}
+        {stats && stats.by_client && stats.by_client.length > 0 && (
+          <div className="mb-10">
+            <h2 className="text-text-primary text-lg sm:text-[22px] font-bold leading-tight tracking-[-0.015em] mb-4">
+              Images by Client ID
+            </h2>
+            <div className="bg-card rounded-xl border border-purple-neon/30 neon-glow p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {stats.by_client.slice(0, 6).map((client, idx) => (
+                  <div key={idx} className="bg-background rounded-lg p-4 border border-purple-neon/20">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-mono text-primary bg-primary/10 px-2 py-1 rounded">
+                        {client.client_id}
+                      </span>
+                      <span className="text-lg font-bold text-text-primary">
+                        {client.count}
+                      </span>
+                    </div>
+                    <p className="text-xs text-text-secondary">
+                      {formatSize(client.total_size)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </Layout>

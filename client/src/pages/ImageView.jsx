@@ -227,6 +227,12 @@ const ImageView = () => {
                     {new Date(image.uploaded_at).toLocaleDateString()}
                   </span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-text-secondary text-xs sm:text-sm">Client ID</span>
+                  <span className="text-text-primary text-xs sm:text-sm font-medium break-words">
+                    {image.client_id || '-'}
+                  </span>
+                </div>
               </div>
 
               <div className="border-t border-purple-neon/20 pt-4 sm:pt-6">

@@ -100,13 +100,59 @@ def upload_image(request):
 @require_http_methods(["GET"])
 def list_images(request):
     """
-    List all images from the database with their metadata.
+    List images from the database with filtering, search, sorting, and pagination.
     
-    Returns: JSON with list of images including name, description, URL, etc.
+    Query parameters:
+    - client_id: Filter by client ID
+    - search: Search in name, description, filename
+    - sort_by: Field to sort by (uploaded_at, name, size) - default: -uploaded_at
+    - page: Page number (default: 1)
+    - page_size: Items per page (default: 20, max: 100)
+    
+    Returns: JSON with paginated list of images and metadata
     """
     try:
-        # Get all images from database
-        images = Image.objects.all()
+        # Get query parameters
+        client_id = request.GET.get('client_id', '').strip()
+        search = request.GET.get('search', '').strip()
+        sort_by = request.GET.get('sort_by', '-uploaded_at')
+        page = int(request.GET.get('page', 1))
+        page_size = min(int(request.GET.get('page_size', 20)), 100)
+        
+        # Start with all images
+        queryset = Image.objects.all()
+        
+        # Apply client_id filter
+        if client_id:
+            queryset = queryset.filter(client_id__iexact=client_id)
+        
+        # Apply search filter
+        if search:
+            from django.db.models import Q
+            queryset = queryset.filter(
+                Q(name__icontains=search) |
+                Q(description__icontains=search) |
+                Q(filename__icontains=search) |
+                Q(original_filename__icontains=search)
+            )
+        
+        # Apply sorting
+        valid_sort_fields = ['uploaded_at', '-uploaded_at', 'name', '-name', 'size', '-size', 'client_id', '-client_id']
+        if sort_by in valid_sort_fields:
+            queryset = queryset.order_by(sort_by)
+        else:
+            queryset = queryset.order_by('-uploaded_at')
+        
+        # Get total count before pagination
+        total_count = queryset.count()
+        
+        # Calculate pagination
+        start_idx = (page - 1) * page_size
+        end_idx = start_idx + page_size
+        total_pages = (total_count + page_size - 1) // page_size
+        
+        # Get paginated images
+        images = queryset[start_idx:end_idx]
         
         image_list = []
         for img in images:
@@ -124,10 +170,27 @@ def list_images(request):
         
         return JsonResponse({
             'success': True,
-            'count': len(image_list),
-            'images': image_list
+            'images': image_list,
+            'pagination': {
+                'page': page,
+                'page_size': page_size,
+                'total_count': total_count,
+                'total_pages': total_pages,
+                'has_next': page < total_pages,
+                'has_previous': page > 1
+            },
+            'filters': {
+                'client_id': client_id,
+                'search': search,
+                'sort_by': sort_by
+            }
         }, status=200)
         
+    except ValueError as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Invalid parameter: {str(e)}'
+        }, status=400)
     except Exception as e:
         return JsonResponse({
             'success': False,
@@ -191,6 +254,47 @@ def update_image(request, image_id):
         return JsonResponse({
             'success': False,
             'error': f'Update failed: {str(e)}'
+        }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_stats(request):
+    """
+    Get statistics about uploaded images.
+    
+    Returns: JSON with overall stats and breakdown by client_id
+    """
+    try:
+        from django.db.models import Count, Sum
+        
+        # Overall stats
+        total_images = Image.objects.count()
+        total_size = Image.objects.aggregate(Sum('size'))['size__sum'] or 0
+        
+        # Stats by client_id
+        client_stats = Image.objects.values('client_id').annotate(
+            count=Count('id'),
+            total_size=Sum('size')
+        ).order_by('-count')
+        
+        # Count unique client IDs from the aggregated groups (handles empty strings correctly)
+        unique_clients_count = client_stats.count()
+        
+        return JsonResponse({
+            'success': True,
+            'stats': {
+                'total_images': total_images,
+                'total_size': total_size,
+                'unique_clients': unique_clients_count,
+                'by_client': list(client_stats)
+            }
+        }, status=200)
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Failed to get stats: {str(e)}'
         }, status=500)
 
 

@@ -36,9 +36,23 @@ export const imageService = {
   },
 
 
-  // List all images
-  listImages: async () => {
-    const response = await api.get('/list/');
+  // List all images with optional filters
+  listImages: async (params = {}) => {
+    const queryParams = new URLSearchParams();
+    if (params.client_id) queryParams.append('client_id', params.client_id);
+    if (params.search) queryParams.append('search', params.search);
+    if (params.sort_by) queryParams.append('sort_by', params.sort_by);
+    if (params.page) queryParams.append('page', params.page);
+    if (params.page_size) queryParams.append('page_size', params.page_size);
+    
+    const url = `/list/${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+    const response = await api.get(url);
+    return response.data;
+  },
+
+  // Get statistics
+  getStats: async () => {
+    const response = await api.get('/stats/');
     return response.data;
   },
 

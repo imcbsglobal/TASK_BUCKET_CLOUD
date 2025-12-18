@@ -9,14 +9,27 @@ export const imageKeys = {
 };
 
 /**
- * Hook to fetch all images
+ * Hook to fetch all images with optional filters
  */
-export const useImages = () => {
+export const useImages = (params = {}) => {
   return useQuery({
-    queryKey: imageKeys.list(),
+    queryKey: [...imageKeys.list(), params],
     queryFn: async () => {
-      const data = await imageService.listImages();
-      return data.images || [];
+      const data = await imageService.listImages(params);
+      return data;
+    },
+  });
+};
+
+/**
+ * Hook to fetch statistics
+ */
+export const useStats = () => {
+  return useQuery({
+    queryKey: ['stats'],
+    queryFn: async () => {
+      const data = await imageService.getStats();
+      return data.stats;
     },
   });
 };
