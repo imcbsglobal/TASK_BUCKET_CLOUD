@@ -20,11 +20,12 @@ if (API_KEY) {
 
 export const imageService = {
   // Upload a single image
-  uploadImage: async (file, name = '', description = '') => {
+  uploadImage: async (file, name = '', description = '', clientId = '') => {
     const formData = new FormData();
     formData.append('image', file);
     if (name) formData.append('name', name);
     if (description) formData.append('description', description);
+    if (clientId) formData.append('client_id', clientId);
 
     const response = await api.post('/upload/', formData, {
       headers: {
@@ -34,6 +35,7 @@ export const imageService = {
     return response.data;
   },
 
+
   // List all images
   listImages: async () => {
     const response = await api.get('/list/');
@@ -41,17 +43,24 @@ export const imageService = {
   },
 
   // Update image metadata
-  updateImage: async (imageId, name, description) => {
-    const response = await api.put(`/update/${imageId}/`, {
-      name,
-      description,
-    });
+  updateImage: async (imageId, name, description, clientId = undefined) => {
+    const body = { name, description };
+    if (typeof clientId !== 'undefined') body.client_id = clientId;
+    const response = await api.put(`/update/${imageId}/`, body);
     return response.data;
   },
 
   // Delete an image
   deleteImage: async (imageId) => {
     const response = await api.delete(`/delete/${imageId}/`);
+    return response.data;
+  },
+
+  // Validate client ID
+  validateClientId: async (clientId) => {
+    const response = await api.post('/validate-client/', {
+      client_id: clientId,
+    });
     return response.data;
   },
 };

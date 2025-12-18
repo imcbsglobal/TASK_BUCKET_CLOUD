@@ -8,7 +8,8 @@ class Image(models.Model):
     filename = models.CharField(max_length=255, unique=True, help_text="Unique filename stored in R2")
     image = models.ImageField(upload_to="images/", help_text="Uploaded image file")
     original_filename = models.CharField(max_length=255, help_text="Original uploaded filename")
-    
+    client_id = models.CharField(max_length=100, help_text="Client identifier for the image")
+     
     # Optional fields
     name = models.CharField(max_length=255, blank=True, null=True, help_text="Custom name for the image")
     description = models.TextField(blank=True, null=True, help_text="Description of the image")

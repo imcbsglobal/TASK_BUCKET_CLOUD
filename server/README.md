@@ -304,7 +304,8 @@ For more information, visit the **API Docs** page in the frontend application or
 curl -X POST http://127.0.0.1:8000/api/upload/ \
   -F "image=@/path/to/your/image.jpg" \
   -F "name=Sunset Photo" \
-  -F "description=Beautiful sunset at the beach"
+  -F "description=Beautiful sunset at the beach" \
+  -F "client_id=client-123"
 ```
 
 **Example using Python requests:**
@@ -331,12 +332,15 @@ print(response.json())
   "url": "https://pub-xxxxxxxx.r2.dev/uuid-filename.jpg",
   "filename": "abc123-def456.jpg",
   "original_filename": "my-image.jpg",
+  "client_id": "client-123",
   "name": "Sunset Photo",
   "description": "Beautiful sunset at the beach",
   "size": 245678,
   "uploaded_at": "2025-12-08T12:30:45.123456Z"
 }
 ```
+
+**Note:** The `client_id` field is required for all upload requests.
 
 **Error Response (400):**
 
@@ -363,17 +367,15 @@ print(response.json())
       "filename": "abc123-def456.jpg",
       "url": "https://pub-xxxxxxxx.r2.dev/abc123-def456.jpg",
       "original_filename": "sunset.jpg",
+      "client_id": "client-123",
       "name": "Sunset Photo",
       "description": "Beautiful sunset at the beach",
       "size": 245678,
-  -H "X-API-Key: imcbs-secret-key-2025" \
-  -F "image=@/path/to/your/image.jpg" \
-  -F "name=Sunset Photo" \
-  -F "description=Beautiful sunset at the beach"
       "id": 2,
       "filename": "xyz789-uvw012.png",
       "url": "https://pub-xxxxxxxx.r2.dev/xyz789-uvw012.png",
       "original_filename": "mountain.png",
+      "client_id": null,
       "name": "Mountain View",
       "description": null,
       "size": 512340,
@@ -392,6 +394,7 @@ response = requests.post(url, files=files, data=data, headers={'X-API-Key': 'imc
 - Body:
   - `name` (optional): Update the image name
   - `description` (optional): Update the image description
+  - `client_id` (optional): Update the client identifier associated with the image
 
 **Example using curl:**
 
@@ -427,6 +430,7 @@ print(response.json())
   "filename": "abc123-def456.jpg",
   "url": "https://pub-xxxxxxxx.r2.dev/abc123-def456.jpg",
   "original_filename": "sunset.jpg",
+  "client_id": "client-123",
   "name": "Updated Sunset",
   "description": "A beautiful sunset at the beach during summer",
   "size": 245678,

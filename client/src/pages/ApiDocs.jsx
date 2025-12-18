@@ -19,7 +19,7 @@ const ApiDocs = () => {
       method: 'POST',
       path: '/upload/',
       title: 'Upload Image',
-      description: 'Upload a new image to Cloudflare R2 storage with optional metadata.',
+      description: 'Upload a new image to Cloudflare R2 storage (client_id is required).',
       headers: [
         { key: 'X-API-Key', value: apiKey, description: 'Required API key for authentication' },
         { key: 'Content-Type', value: 'multipart/form-data', description: 'Required for file upload' }
@@ -29,7 +29,8 @@ const ApiDocs = () => {
         fields: [
           { name: 'image', type: 'file', required: true, description: 'Image file to upload (jpg, png, gif, webp, bmp)' },
           { name: 'name', type: 'string', required: false, description: 'Optional name/title for the image' },
-          { name: 'description', type: 'string', required: false, description: 'Optional description of the image' }
+          { name: 'description', type: 'string', required: false, description: 'Optional description of the image' },
+          { name: 'client_id', type: 'string', required: true, description: 'Client identifier associated with the image (required)' }
         ]
       },
       successResponse: {
@@ -40,12 +41,14 @@ const ApiDocs = () => {
   "url": "https://your-r2-bucket.example.com/abc123.jpg",
   "filename": "abc123.jpg",
   "original_filename": "photo.jpg",
+  "client_id": "client-123",
   "name": "My Photo",
   "description": "A beautiful sunset",
   "size": 245678,
   "uploaded_at": "2025-12-10T10:30:00Z"
 }`
       },
+
       errorResponse: {
         status: 400,
         example: `{
@@ -53,11 +56,12 @@ const ApiDocs = () => {
   "error": "No image file provided. Please send a file with key \\"image\\"."
 }`
       },
-      curlExample: `curl -X POST ${baseUrl}/upload/ \\
-  -H "X-API-Key: ${apiKey}" \\
-  -F "image=@/path/to/your/image.jpg" \\
-  -F "name=My Photo" \\
-  -F "description=A beautiful sunset"`
+      curlExample: `curl -X POST ${baseUrl}/upload/
+  -H "X-API-Key: ${apiKey}"
+  -F "image=@/path/to/your/image.jpg"
+  -F "name=My Photo"
+  -F "description=A beautiful sunset"
+  -F "client_id=client-123"`,
     },
     {
       id: 'list',
@@ -80,6 +84,7 @@ const ApiDocs = () => {
       "filename": "abc123.jpg",
       "url": "https://your-r2-bucket.example.com/abc123.jpg",
       "original_filename": "photo.jpg",
+      "client_id": "client-123",
       "name": "My Photo",
       "description": "A beautiful sunset",
       "size": 245678,
@@ -90,6 +95,7 @@ const ApiDocs = () => {
       "filename": "def456.png",
       "url": "https://your-r2-bucket.example.com/def456.png",
       "original_filename": "screenshot.png",
+      "client_id": null,
       "name": "Screenshot",
       "description": null,
       "size": 123456,
@@ -105,8 +111,8 @@ const ApiDocs = () => {
   "error": "Failed to list images: Database connection error"
 }`
       },
-      curlExample: `curl -X GET ${baseUrl}/list/ \\
-  -H "X-API-Key: ${apiKey}"`
+      curlExample: `curl -X GET ${baseUrl}/list/
+  -H "X-API-Key: ${apiKey}"`,
     },
     {
       id: 'update',
@@ -122,11 +128,13 @@ const ApiDocs = () => {
         type: 'application/json',
         fields: [
           { name: 'name', type: 'string', required: false, description: 'New name/title for the image' },
-          { name: 'description', type: 'string', required: false, description: 'New description for the image' }
+          { name: 'description', type: 'string', required: false, description: 'New description for the image' },
+          { name: 'client_id', type: 'string', required: false, description: 'Update the client identifier for the image' }
         ],
         example: `{
   "name": "Updated Photo Title",
-  "description": "Updated description text"
+  "description": "Updated description text",
+  "client_id": "client-123"
 }`
       },
       successResponse: {
@@ -137,6 +145,7 @@ const ApiDocs = () => {
   "filename": "abc123.jpg",
   "url": "https://your-r2-bucket.example.com/abc123.jpg",
   "original_filename": "photo.jpg",
+  "client_id": "client-123",
   "name": "Updated Photo Title",
   "description": "Updated description text",
   "size": 245678,
@@ -150,10 +159,10 @@ const ApiDocs = () => {
   "error": "Image with id 999 not found."
 }`
       },
-      curlExample: `curl -X PUT ${baseUrl}/update/1/ \\
-  -H "X-API-Key: ${apiKey}" \\
-  -H "Content-Type: application/json" \\
-  -d '{"name": "Updated Photo Title", "description": "Updated description text"}'`
+      curlExample: `curl -X PUT ${baseUrl}/update/1/
+  -H "X-API-Key: ${apiKey}"
+  -H "Content-Type: application/json"
+  -d '{"name": "Updated Photo Title", "description": "Updated description text", "client_id": "client-123"}'`,
     },
     {
       id: 'delete',
@@ -179,11 +188,10 @@ const ApiDocs = () => {
   "error": "Image with id 999 not found."
 }`
       },
-      curlExample: `curl -X DELETE ${baseUrl}/delete/1/ \\
-  -H "X-API-Key: ${apiKey}"`
+      curlExample: `curl -X DELETE ${baseUrl}/delete/1/
+  -H "X-API-Key: ${apiKey}"`,
     }
   ];
-
   const methodColors = {
     GET: 'bg-success/10 text-success dark:bg-success/20 dark:text-success',
     POST: 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary',

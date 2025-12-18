@@ -46,8 +46,8 @@ export const useUploadImage = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ file, name, description }) => {
-      return imageService.uploadImage(file, name, description);
+    mutationFn: ({ file, name, description, clientId }) => {
+      return imageService.uploadImage(file, name, description, clientId);
     },
     onSuccess: () => {
       // Invalidate and refetch images list
@@ -63,8 +63,8 @@ export const useUpdateImage = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, name, description }) => {
-      return imageService.updateImage(id, name, description);
+    mutationFn: ({ id, name, description, clientId }) => {
+      return imageService.updateImage(id, name, description, clientId);
     },
     onSuccess: (data, variables) => {
       // Invalidate both list and detail queries

@@ -1,18 +1,46 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { compressImage } from '../utils/compressImage';
 import Layout from '../components/Layout';
 import Toast from '../components/Toast';
-import { MdCloudUpload, MdContentCopy } from 'react-icons/md';
+import { MdCloudUpload, MdContentCopy, MdCheckCircle, MdError } from 'react-icons/md';
 import { useImages, useUploadImage } from '../hooks/useImages';
+import { imageService } from '../services/api';
 
 const Dashboard = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [customName, setCustomName] = useState('');
   const [description, setDescription] = useState('');
+  const [clientId, setClientId] = useState('');
+  const [clientIdValidation, setClientIdValidation] = useState({ status: null, message: '' }); // null, 'validating', 'valid', 'invalid'
   const [message, setMessage] = useState({ type: '', text: '' });
 
   // React Query hooks
   const { data: images = [], isLoading: loading } = useImages();
   const uploadMutation = useUploadImage();
+
+  // Validate client ID with debounce
+  useEffect(() => {
+    if (!clientId || clientId.trim() === '') {
+      setClientIdValidation({ status: null, message: '' });
+      return;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      setClientIdValidation({ status: 'validating', message: 'Validating...' });
+      try {
+        const result = await imageService.validateClientId(clientId.trim());
+        if (result.valid) {
+          setClientIdValidation({ status: 'valid', message: 'Valid Client ID' });
+        } else {
+          setClientIdValidation({ status: 'invalid', message: result.error || 'Invalid Client ID' });
+        }
+      } catch (error) {
+        setClientIdValidation({ status: 'invalid', message: 'Could not validate Client ID' });
+      }
+    }, 800); // 800ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [clientId]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -33,12 +61,41 @@ const Dashboard = () => {
     }
 
     try {
+      // Ensure client ID is provided and valid
+      if (!clientId) {
+        setMessage({ type: 'error', text: 'Client ID is required' });
+        return;
+      }
+
+      if (clientIdValidation.status !== 'valid') {
+        setMessage({ type: 'error', text: 'Please enter a valid Client ID' });
+        return;
+      }
+
+      // Compress on the client to reduce upload size with minimal quality drop
+      const beforeSize = selectedFile.size;
+      const compressed = await compressImage(selectedFile, { maxWidth: 1920, maxHeight: 1920, quality: 0.8, maxSizeMB: 1 });
+
+      if (compressed.size !== beforeSize) {
+        const pretty = (bytes) => {
+          if (bytes < 1024) return bytes + ' B';
+          if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+          return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        };
+        setMessage({ type: 'success', text: `Compressed image: ${pretty(beforeSize)} → ${pretty(compressed.size)}` });
+        // show message briefly
+        setTimeout(() => setMessage({ type: '', text: '' }), 2500);
+      }
+
       await uploadMutation.mutateAsync({
-        file: selectedFile,
+        file: compressed,
         name: customName,
         description: description,
+        clientId: clientId || undefined,
       });
-      
+
+      setClientId('');
+
       setMessage({ type: 'success', text: 'Image uploaded successfully!' });
       setSelectedFile(null);
       setCustomName('');
@@ -73,9 +130,9 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <Toast 
-        type={message.type} 
-        message={message.text} 
+      <Toast
+        type={message.type}
+        message={message.text}
         onClose={() => setMessage({ type: '', text: '' })}
       />
       <div className="mx-auto max-w-4xl mt-12 md:mt-0">
@@ -85,14 +142,14 @@ const Dashboard = () => {
           </h1>
         </div>
 
-    
+
         <div className="bg-card rounded-xl border border-purple-neon/30 neon-glow p-4 sm:p-6">
           <h2 className="text-text-primary text-lg sm:text-[22px] font-bold leading-tight tracking-[-0.015em] pb-4 sm:pb-5">
             Upload a New Image
           </h2>
-          
+
           <div className="flex flex-col p-4 mb-6">
-            <div 
+            <div
               onClick={() => document.getElementById('fileInput').click()}
               className="flex flex-col items-center gap-6 rounded-lg border-2 border-dashed border-primary/50 px-6 py-14 bg-primary/5 hover:bg-primary/10 transition-all cursor-pointer"
             >
@@ -133,20 +190,51 @@ const Dashboard = () => {
               />
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 gap-4 sm:gap-6 px-2 sm:px-4">
+            <label className="flex flex-col">
+              <p className="text-text-primary text-sm sm:text-base font-medium leading-normal pb-2">
+                Client ID (Required) <span className="text-error">*</span>
+              </p>
+              <div className="relative">
+                <input
+                  required
+                  className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-purple-neon/30 bg-background h-11 sm:h-12 placeholder:text-text-secondary p-3 pr-10 text-sm sm:text-base font-normal leading-normal"
+                  placeholder="Enter client id (e.g., KROCPSOW7X)"
+                  value={clientId}
+                  onChange={(e) => setClientId(e.target.value.toUpperCase())}
+                />
+                {clientIdValidation.status === 'validating' && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full"></div>
+                  </div>
+                )}
+                {clientIdValidation.status === 'valid' && (
+                  <MdCheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-success text-xl" />
+                )}
+                {clientIdValidation.status === 'invalid' && (
+                  <MdError className="absolute right-3 top-1/2 transform -translate-y-1/2 text-error text-xl" />
+                )}
+              </div>
+              {clientIdValidation.message && (
+                <p className={`text-xs mt-1 ${clientIdValidation.status === 'valid' ? 'text-success' : 'text-error'}`}>
+                  {clientIdValidation.message}
+                </p>
+              )}
+            </label>
             <label className="flex flex-col">
               <p className="text-text-primary text-sm sm:text-base font-medium leading-normal pb-2">
                 Name (Optional)
               </p>
               <input
+              
                 className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-purple-neon/30 bg-background h-11 sm:h-12 placeholder:text-text-secondary p-3 text-sm sm:text-base font-normal leading-normal"
                 placeholder="Enter a custom name"
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
               />
             </label>
-            
+
             <label className="flex flex-col">
               <p className="text-text-primary text-sm sm:text-base font-medium leading-normal pb-2">
                 Description (Optional)
@@ -158,19 +246,21 @@ const Dashboard = () => {
                 onChange={(e) => setDescription(e.target.value)}
               />
             </label>
+
+
           </div>
-          
+
           <div className="px-4 pt-6">
             <button
               onClick={handleUpload}
-              disabled={!selectedFile || uploadMutation.isPending}
+              disabled={!selectedFile || uploadMutation.isPending || clientIdValidation.status !== 'valid'}
               className="flex w-full md:w-auto min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-6 gradient-bg text-white text-sm font-bold leading-normal tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed neon-glow hover:shadow-neon-pink transition-all"
             >
               <span className="truncate">{uploadMutation.isPending ? 'Uploading...' : 'Upload Image'}</span>
             </button>
           </div>
         </div>
-    <div className="mb-10">
+        <div className="mb-10">
           <h2 className="text-text-primary text-lg sm:text-[22px] font-bold leading-tight tracking-[-0.015em] mb-4 mt-8 sm:mt-10">
             Recent Uploads
           </h2>

@@ -6,4 +6,5 @@ urlpatterns = [
     path('list/', views.list_images, name='list_images'),
     path('update/<int:image_id>/', views.update_image, name='update_image'),
     path('delete/<int:image_id>/', views.delete_image, name='delete_image'),
+    path('validate-client/', views.validate_client, name='validate_client'),
 ]

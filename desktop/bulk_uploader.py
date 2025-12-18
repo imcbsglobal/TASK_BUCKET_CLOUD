@@ -9,6 +9,8 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, scrolledtext
 import pandas as pd
 import requests
+import io
+import tempfile
 import mimetypes
 from pathlib import Path
 import threading
@@ -16,6 +18,14 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 from queue import Queue
+
+# Optional Pillow import; compression will be skipped if Pillow is not available
+try:
+    from PIL import Image
+    PIL_AVAILABLE = True
+except Exception:
+    Image = None
+    PIL_AVAILABLE = False
 
 
 class BulkImageUploader:
@@ -45,6 +55,8 @@ class BulkImageUploader:
         self.excel_file_path = tk.StringVar()
         self.api_endpoint = tk.StringVar(value="http://localhost:8000/api/upload/")
         self.api_key = tk.StringVar(value="imcbs-secret-key-2025")
+        self.client_id = tk.StringVar()
+        self.client_id_valid = False
         self.file_field_name = tk.StringVar(value="image")
         self.max_workers = tk.IntVar(value=5)
         self.is_uploading = False
@@ -167,6 +179,30 @@ class BulkImageUploader:
         ttk.Label(api_row, text="API Key:", font=("Segoe UI", 9)).pack(side=tk.LEFT, padx=(0, 5))
         api_key_entry = ttk.Entry(api_row, textvariable=self.api_key, width=28, font=("Segoe UI", 9))
         api_key_entry.pack(side=tk.LEFT, padx=(0, 15))
+        
+        # Client ID Row (NEW)
+        client_id_row = ttk.Frame(config_frame)
+        client_id_row.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 12))
+        
+        ttk.Label(client_id_row, text="Client ID (Required):", font=("Segoe UI", 10, "bold")).pack(side=tk.LEFT, padx=(0, 10))
+        self.client_id_entry = ttk.Entry(client_id_row, textvariable=self.client_id, width=30, font=("Segoe UI", 9))
+        self.client_id_entry.pack(side=tk.LEFT, padx=(0, 10))
+        
+        validate_btn = ttk.Button(
+            client_id_row,
+            text="Validate Client ID",
+            command=self.validate_client_id,
+            style='Secondary.TButton'
+        )
+        validate_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
+        self.client_id_status_label = tk.Label(
+            client_id_row,
+            text="",
+            font=("Segoe UI", 9),
+            bg=self.colors['bg']
+        )
+        self.client_id_status_label.pack(side=tk.LEFT)
         
         ttk.Label(api_row, text="Threads:", font=("Segoe UI", 9)).pack(side=tk.LEFT, padx=(0, 5))
         workers_spinbox = ttk.Spinbox(
@@ -385,7 +421,68 @@ class BulkImageUploader:
         if file_path:
             self.excel_file_path.set(file_path)
             self.log_message(f"Selected file: {file_path}", "INFO")
-            self.upload_btn.config(state=tk.NORMAL)
+            # Enable upload button only if client ID is also valid
+            if self.client_id_valid:
+                self.upload_btn.config(state=tk.NORMAL)
+    
+    def validate_client_id(self):
+        """Validate client ID against remote API"""
+        client_id = self.client_id.get().strip().upper()
+        
+        if not client_id:
+            self.client_id_status_label.config(text="⚠ Please enter a Client ID", fg=self.colors['warning'])
+            self.client_id_valid = False
+            self.upload_btn.config(state=tk.DISABLED)
+            return
+        
+        self.client_id_status_label.config(text="⏳ Validating...", fg=self.colors['info'])
+        self.log_message(f"Validating Client ID: {client_id}", "INFO")
+        
+        def validate():
+            try:
+                CLIENT_ID_API_URL = "https://activate.imcbs.com/client-id-list/get-client-ids/"
+                response = requests.get(CLIENT_ID_API_URL, timeout=10)
+                response.raise_for_status()
+                data = response.json()
+                valid_ids = data.get('client_ids', [])
+                
+                if client_id in [vid.upper() for vid in valid_ids]:
+                    self.root.after(0, lambda: self.client_id_status_label.config(
+                        text="✓ Valid Client ID",
+                        fg=self.colors['success']
+                    ))
+                    self.client_id_valid = True
+                    self.client_id.set(client_id)  # Store validated uppercase version
+                    self.log_message(f"Client ID '{client_id}' is valid", "SUCCESS")
+                    # Enable upload button if file is also selected
+                    if self.excel_file_path.get():
+                        self.root.after(0, lambda: self.upload_btn.config(state=tk.NORMAL))
+                else:
+                    self.root.after(0, lambda: self.client_id_status_label.config(
+                        text="✗ Invalid Client ID",
+                        fg=self.colors['error']
+                    ))
+                    self.client_id_valid = False
+                    self.log_message(f"Client ID '{client_id}' is NOT registered", "ERROR")
+                    self.root.after(0, lambda: self.upload_btn.config(state=tk.DISABLED))
+                    
+            except requests.exceptions.Timeout:
+                self.root.after(0, lambda: self.client_id_status_label.config(
+                    text="⚠ Validation timeout",
+                    fg=self.colors['warning']
+                ))
+                self.log_message("Client ID validation timed out", "WARNING")
+                self.client_id_valid = False
+            except Exception as e:
+                self.root.after(0, lambda: self.client_id_status_label.config(
+                    text="⚠ Validation failed",
+                    fg=self.colors['warning']
+                ))
+                self.log_message(f"Client ID validation error: {str(e)}", "ERROR")
+                self.client_id_valid = False
+        
+        # Run validation in separate thread to avoid blocking UI
+        threading.Thread(target=validate, daemon=True).start()
             
     def log_message(self, message, level="INFO"):
         """Add message to log queue for thread-safe logging"""
@@ -440,6 +537,10 @@ class BulkImageUploader:
         """Start the upload process in a separate thread"""
         if self.is_uploading:
             messagebox.showwarning("Upload in Progress", "An upload is already in progress.")
+            return
+        
+        if not self.client_id_valid or not self.client_id.get():
+            messagebox.showerror("Invalid Client ID", "Please validate a Client ID before uploading.")
             return
             
         if not self.excel_file_path.get():
@@ -639,17 +740,26 @@ class BulkImageUploader:
     def upload_image(self, image_path, name, description):
         """Upload image to Django API endpoint"""
         try:
+            # Compress image before uploading (preserve dimensions; change encoding/quality)
+            try:
+                compressed_path = self.compress_image(image_path, max_size_mb=2, quality=85, min_quality=65)
+            except Exception as e:
+                compressed_path = image_path
+                self.log_message(f"Compression skipped due to error: {e}", "WARNING")
+
             # Prepare the multipart form data
-            with open(image_path, 'rb') as image_file:
-                # Detect mimetype
-                mimetype = mimetypes.guess_type(image_path)[0] or 'application/octet-stream'
+            with open(compressed_path, 'rb') as image_file:
+                # Detect mimetype based on the file we will upload
+                mimetype = mimetypes.guess_type(compressed_path)[0] or 'application/octet-stream'
                 field_name = self.file_field_name.get().strip() or 'image'
+                # Use the compressed filename so extension matches content
                 files = {
-                    field_name: (os.path.basename(image_path), image_file, mimetype)
+                    field_name: (os.path.basename(compressed_path), image_file, mimetype)
                 }
                 data = {
                     'name': name,
-                    'description': description
+                    'description': description,
+                    'client_id': self.client_id.get()
                 }
                 
                 # Make POST request with X-API-Key header
@@ -698,6 +808,156 @@ class BulkImageUploader:
             return {'success': False, 'error': 'Connection error - check API endpoint'}
         except Exception as e:
             return {'success': False, 'error': str(e)}
+        finally:
+            # If we created a temporary compressed file, remove it
+            try:
+                if 'compressed_path' in locals() and compressed_path != image_path and os.path.exists(compressed_path):
+                    os.remove(compressed_path)
+                    self.log_message(f"Removed temp compressed file: {compressed_path}", "DEBUG")
+            except Exception:
+                pass
+
+    def compress_image(self, image_path, max_size_mb=2, quality=85, min_quality=65):
+        """Compress an image while preserving dimensions and original extension.
+
+        - quality: initial quality for lossy formats (0-100)
+        - max_size_mb: target maximum size in MB
+        - min_quality: minimum acceptable quality
+
+        This implementation attempts to save compressed data in the original image
+        format (so the extension stays the same). For PNGs it will try lossless
+        optimizations and color quantization; for JPEG/WEBP it will reduce quality
+        iteratively until under target size or min quality.
+
+        Returns path to compressed temporary file (suffix = original extension), or
+        original image_path if compression was not performed or did not reduce size.
+        """
+        # Skip if PIL not available
+        if not PIL_AVAILABLE:
+            self.log_message("Pillow is not installed; skipping image compression", "WARNING")
+            return image_path
+
+        # Skip animated GIFs or SVGs
+        ext = os.path.splitext(image_path)[1].lower()
+        if ext in ('.gif', '.svg'):
+            self.log_message(f"Skipping compression for {ext} files: {image_path}", "DEBUG")
+            return image_path
+
+        max_bytes = int(max_size_mb * 1024 * 1024)
+        try:
+            orig_size = os.path.getsize(image_path)
+        except Exception:
+            orig_size = None
+
+        try:
+            img = Image.open(image_path)
+        except Exception as e:
+            self.log_message(f"Failed to open image for compression: {e}", "ERROR")
+            return image_path
+
+        orig_format = (img.format or '').upper()
+        # Fallback mapping from extension
+        ext_map = {'.jpg': 'JPEG', '.jpeg': 'JPEG', '.png': 'PNG', '.webp': 'WEBP'}
+        if not orig_format:
+            orig_format = ext_map.get(ext, 'JPEG')
+
+        best_bytes = None
+        best_buffer = None
+
+        # JPEG-like: reduce quality aggressively (similar to frontend logic)
+        if orig_format in ('JPEG', 'JPG', 'WEBP'):
+            # Start lower and reduce more aggressively
+            current_quality = max(75, quality - 10)  # Start around 75
+            min_qual_floor = min(35, min_quality)    # Go down to 35 minimum
+            
+            while current_quality >= min_qual_floor:
+                buf = io.BytesIO()
+                try:
+                    if orig_format in ('JPEG', 'JPG'):
+                        rgb = img.convert('RGB')
+                        rgb.save(buf, format='JPEG', quality=int(current_quality), optimize=True, progressive=True)
+                    else:
+                        img.save(buf, format='WEBP', quality=int(current_quality), method=6)
+                except Exception as e:
+                    self.log_message(f"Compression save failed at quality {current_quality}: {e}", "DEBUG")
+                    current_quality -= 15
+                    continue
+
+                size = buf.tell()
+                if best_bytes is None or size < best_bytes:
+                    best_bytes = size
+                    best_buffer = buf.getvalue()
+
+                # Continue trying lower qualities even if under max_bytes
+                current_quality -= 15
+
+        # PNG: try optimize and color quantization (reducing colors)
+        elif orig_format == 'PNG':
+            # First try a lossless optimize
+            try:
+                buf = io.BytesIO()
+                img.save(buf, format='PNG', optimize=True)
+                size = buf.tell()
+                best_bytes = size
+                best_buffer = buf.getvalue()
+            except Exception:
+                best_bytes = None
+                best_buffer = None
+
+            # If still too big, try quantizing to fewer colors
+            if best_bytes is None or best_bytes > max_bytes:
+                for colors in (256, 128, 64, 32, 16, 8):
+                    try:
+                        buf = io.BytesIO()
+                        # Convert to palette-based image to reduce size
+                        q = img.convert('P', palette=Image.ADAPTIVE, colors=colors)
+                        q.save(buf, format='PNG', optimize=True)
+                        size = buf.tell()
+                        if best_bytes is None or size < best_bytes:
+                            best_bytes = size
+                            best_buffer = buf.getvalue()
+                        if size <= max_bytes:
+                            break
+                    except Exception as e:
+                        self.log_message(f"PNG quantize attempt failed ({colors} colors): {e}", "DEBUG")
+                        continue
+
+        else:
+            # Unknown format: attempt to save as original format (best effort)
+            try:
+                buf = io.BytesIO()
+                img.save(buf, format=orig_format)
+                size = buf.tell()
+                best_bytes = size
+                best_buffer = buf.getvalue()
+            except Exception:
+                self.log_message(f"Unsupported image format for compression: {orig_format}", "DEBUG")
+                img.close()
+                return image_path
+
+        img.close()
+
+        # If compression did not produce a smaller file, keep original
+        if best_bytes is None or (orig_size is not None and best_bytes >= orig_size):
+            self.log_message(f"Compression did not reduce size for {image_path}", "DEBUG")
+            return image_path
+
+        # Write best_buffer to a temp file using original extension
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=ext)
+        try:
+            tmp.write(best_buffer)
+            tmp.close()
+            reduction_pct = ((orig_size - best_bytes) / orig_size * 100) if orig_size else 0
+            self.log_message(f"Compressed: {os.path.basename(image_path)} | {orig_size} → {best_bytes} bytes ({reduction_pct:.1f}% reduction)", "INFO")
+            return tmp.name
+        except Exception as e:
+            try:
+                tmp.close()
+                os.remove(tmp.name)
+            except Exception:
+                pass
+            self.log_message(f"Failed to write compressed file: {e}", "ERROR")
+            return image_path
     
     def save_updated_excel(self, df):
         """Save the updated DataFrame to a new Excel file"""

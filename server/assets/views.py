@@ -5,6 +5,7 @@ from django.views.decorators.http import require_http_methods
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from .models import Image
+from .utils.client_validator import validate_client_id
 import uuid
 import os
 
@@ -29,9 +30,25 @@ def upload_image(request):
         
         image_file = request.FILES['image']
         
-        # Get optional name and description from POST data
+        # Get name, description, and client_id from POST data
         name = request.POST.get('name', None)
         description = request.POST.get('description', None)
+        client_id = request.POST.get('client_id', None)
+
+        # client_id is required
+        if not client_id:
+            return JsonResponse({
+                'success': False,
+                'error': 'client_id is required'
+            }, status=400)
+        
+        # Validate client_id against remote API
+        is_valid, error_message = validate_client_id(client_id)
+        if not is_valid:
+            return JsonResponse({
+                'success': False,
+                'error': error_message
+            }, status=403)
         
         # Validate file type (basic check)
         allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp']
@@ -53,6 +70,7 @@ def upload_image(request):
             filename=unique_filename,
             image=image_file,
             original_filename=original_filename,
+            client_id=client_id,
             name=name,
             description=description,
             size=image_file.size
@@ -64,6 +82,7 @@ def upload_image(request):
             'url': image_obj.image.url if image_obj.image else None,
             'filename': unique_filename,
             'original_filename': original_filename,
+            'client_id': client_id,
             'name': name,
             'description': description,
             'size': image_file.size,
@@ -96,6 +115,7 @@ def list_images(request):
                 'filename': img.filename,
                 'url': img.image.url if img.image else None,
                 'original_filename': img.original_filename,
+                'client_id': img.client_id,
                 'name': img.name,
                 'description': img.description,
                 'size': img.size,
@@ -149,6 +169,8 @@ def update_image(request, image_id):
             image_obj.name = data['name']
         if 'description' in data:
             image_obj.description = data['description']
+        if 'client_id' in data:
+            image_obj.client_id = data['client_id']
         
         image_obj.save()
         
@@ -158,6 +180,7 @@ def update_image(request, image_id):
             'filename': image_obj.filename,
             'url': image_obj.image.url if image_obj.image else None,
             'original_filename': image_obj.original_filename,
+            'client_id': image_obj.client_id,
             'name': image_obj.name,
             'description': image_obj.description,
             'size': image_obj.size,
@@ -168,6 +191,56 @@ def update_image(request, image_id):
         return JsonResponse({
             'success': False,
             'error': f'Update failed: {str(e)}'
+        }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def validate_client(request):
+    """
+    Validate a client ID against the remote API.
+    
+    Expected: POST request with JSON body containing 'client_id'
+    Returns: JSON with validation result
+    """
+    try:
+        import json
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid JSON in request body.'
+            }, status=400)
+        
+        client_id = data.get('client_id', '').strip()
+        
+        if not client_id:
+            return JsonResponse({
+                'success': False,
+                'valid': False,
+                'error': 'client_id is required'
+            }, status=400)
+        
+        is_valid, error_message = validate_client_id(client_id)
+        
+        if is_valid:
+            return JsonResponse({
+                'success': True,
+                'valid': True,
+                'message': 'Client ID is valid'
+            }, status=200)
+        else:
+            return JsonResponse({
+                'success': True,
+                'valid': False,
+                'error': error_message
+            }, status=200)
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Validation failed: {str(e)}'
         }, status=500)
 
 
