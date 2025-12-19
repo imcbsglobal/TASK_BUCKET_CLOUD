@@ -100,6 +100,9 @@ curl -X POST http://localhost:8000/api/upload/ \
   -F "description=A beautiful sunset"
 ```
 
+> Note: The server will automatically compress images larger than `IMAGE_MAX_UPLOAD_MB` (default 1 MB) to reduce upload sizes and storage use. Compression respects animated GIFs and other formats that are not suitable for lossy compression.
+
+
 #### 2. List All Images
 ```bash
 curl -X GET http://localhost:8000/api/list/ \

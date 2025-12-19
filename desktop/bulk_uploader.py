@@ -53,7 +53,7 @@ class BulkImageUploader:
         
         # Variables
         self.excel_file_path = tk.StringVar()
-        self.api_endpoint = tk.StringVar(value="http://localhost:8000/api/upload/")
+        self.api_endpoint = tk.StringVar(value="https://gallery.imcbs.com/api/upload/")
         self.api_key = tk.StringVar(value="imcbs-secret-key-2025")
         self.client_id = tk.StringVar()
         self.client_id_valid = False

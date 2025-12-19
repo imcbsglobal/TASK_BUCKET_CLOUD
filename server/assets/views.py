@@ -59,7 +59,29 @@ def upload_image(request):
                 'success': False,
                 'error': f'Invalid file type. Allowed: {", ".join(allowed_extensions)}'
             }, status=400)
-        
+
+        # If the upload is bigger than server threshold, try server-side compression
+        from django.conf import settings as django_settings
+        try:
+            max_mb = float(getattr(django_settings, 'IMAGE_MAX_UPLOAD_MB', 1))
+        except Exception:
+            max_mb = 1.0
+
+        compressed_flag = False
+        if getattr(image_file, 'size', 0) > max_mb * 1024 * 1024:
+            from .utils.compress_image import compress_image_file
+            compressed = compress_image_file(
+                image_file,
+                max_size_mb=max_mb,
+                initial_quality=getattr(django_settings, 'IMAGE_COMPRESSION_QUALITY', 80),
+                min_quality=getattr(django_settings, 'IMAGE_COMPRESSION_MIN_QUALITY', 45),
+            )
+            # If compressed, replace the file and update extension used
+            if compressed is not None and compressed is not image_file:
+                image_file = compressed
+                file_ext = os.path.splitext(getattr(image_file, 'name', image_file.name))[1].lower()
+                compressed_flag = True
+
         # Generate unique filename for storage
         unique_filename = f"{uuid.uuid4()}{file_ext}"
         original_filename = getattr(image_file, 'original_name', None) or image_file.name  # Always capture before overwrite
@@ -86,6 +108,7 @@ def upload_image(request):
             'name': name,
             'description': description,
             'size': image_file.size,
+            'compressed': compressed_flag,
             'uploaded_at': image_obj.uploaded_at.isoformat()
         }, status=201)
         

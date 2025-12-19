@@ -3,6 +3,17 @@
 A Windows desktop application built with Python and Tkinter for batch uploading images from Excel to your Django REST API.
 
 ---
+## 📦 Build Executable
+
+Build a standalone Windows executable using PyInstaller:
+
+```bash
+pyinstaller --onefile --windowed --name "IMC_Bulk_Image_Uploader" --hidden-import=PIL._tkinter_finder bulk_uploader.py
+```
+
+The executable will be created in the `dist/` folder and can be run without Python installed.
+
+---
 
 ## 📋 Features
 

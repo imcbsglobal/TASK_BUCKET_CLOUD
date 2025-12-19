@@ -186,6 +186,11 @@ else:
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Image compression defaults (used by server-side compression when an upload exceeds IMAGE_MAX_UPLOAD_MB)
+IMAGE_MAX_UPLOAD_MB = float(os.getenv('IMAGE_MAX_UPLOAD_MB', '1'))  # default 1 MB
+IMAGE_COMPRESSION_QUALITY = int(os.getenv('IMAGE_COMPRESSION_QUALITY', '80'))
+IMAGE_COMPRESSION_MIN_QUALITY = int(os.getenv('IMAGE_COMPRESSION_MIN_QUALITY', '45'))
+
 # API Authentication
 # Hardcoded API key for basic authentication
 API_KEY = 'imcbs-secret-key-2025'

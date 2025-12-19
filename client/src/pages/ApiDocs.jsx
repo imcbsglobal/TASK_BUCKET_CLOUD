@@ -27,12 +27,13 @@ const ApiDocs = () => {
       requestBody: {
         type: 'multipart/form-data',
         fields: [
-          { name: 'image', type: 'file', required: true, description: 'Image file to upload (jpg, png, gif, webp, bmp)' },
+          { name: 'image', type: 'file', required: true, description: 'Image file to upload (jpg, png, gif, webp, bmp). If the uploaded file exceeds the server threshold (`IMAGE_MAX_UPLOAD_MB`, default 1 MB), the server may compress it before storing; the original format and filename are preserved when possible. Animated GIFs and other formats that are unsuitable for lossy compression are skipped.' },
           { name: 'name', type: 'string', required: false, description: 'Optional name/title for the image' },
           { name: 'description', type: 'string', required: false, description: 'Optional description of the image' },
           { name: 'client_id', type: 'string', required: true, description: 'Client identifier associated with the image (required)' }
         ]
       },
+
       successResponse: {
         status: 201,
         example: `{
@@ -44,7 +45,8 @@ const ApiDocs = () => {
   "client_id": "client-123",
   "name": "My Photo",
   "description": "A beautiful sunset",
-  "size": 245678,
+  "size": 123456,
+  "compressed": true,
   "uploaded_at": "2025-12-10T10:30:00Z"
 }`
       },
@@ -402,7 +404,15 @@ const ApiDocs = () => {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary mt-0.5">•</span>
-                <span>Maximum file size: 10MB per image upload.</span>
+                <span>Server-side compression: images larger than <code className="bg-blue-100 dark:bg-blue-900/50 px-1 rounded">IMAGE_MAX_UPLOAD_MB</code> (default 1 MB) are automatically compressed where possible. The server preserves the original format and filename when possible and skips formats unsuitable for lossy compression (e.g., animated GIFs).</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-0.5">•</span>
+                <span>EXIF orientation is respected (images are auto-rotated based on EXIF metadata during processing).</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-0.5">•</span>
+                <span>Compression settings can be configured via environment variables: <code className="bg-blue-100 dark:bg-blue-900/50 px-1 rounded">IMAGE_MAX_UPLOAD_MB</code>, <code className="bg-blue-100 dark:bg-blue-900/50 px-1 rounded">IMAGE_COMPRESSION_QUALITY</code>, and <code className="bg-blue-100 dark:bg-blue-900/50 px-1 rounded">IMAGE_COMPRESSION_MIN_QUALITY</code>.</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary mt-0.5">•</span>
