@@ -37,31 +37,22 @@ def fetch_valid_client_ids():
 
 
 def validate_client_id(client_id):
-    """
-    Validate if a client ID exists in the remote list of valid IDs.
-    
-    Args:
-        client_id (str): The client ID to validate
-        
-    Returns:
-        tuple: (is_valid: bool, error_message: str or None)
-    """
     if not client_id:
         return False, "Client ID is required"
-    
+
     valid_ids = fetch_valid_client_ids()
-    
+
     if not valid_ids:
-        # If we can't fetch valid IDs, log error but allow upload to avoid blocking
         logger.warning("Could not fetch valid client IDs, allowing upload")
         return True, None
-    
-    if client_id.upper() in [vid.upper() for vid in valid_ids]:
+
+    def normalize(cid):
+        return str(cid).strip().upper()
+
+    valid_ids_set = {normalize(vid) for vid in valid_ids}
+
+    if normalize(client_id) in valid_ids_set:
         return True, None
-    
-    return False, f"Invalid client ID. Client ID '{client_id}' is not registered in the system."
 
+    return False, f"Invalid client ID. Client ID '{client_id}' is not registered."
 
-def clear_client_id_cache():
-    """Clear the cached client ID list to force a refresh."""
-    fetch_valid_client_ids.cache_clear()
