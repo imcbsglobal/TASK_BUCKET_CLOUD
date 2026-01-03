@@ -5,6 +5,8 @@ import Dashboard from './pages/Dashboard';
 import Gallery from './pages/Gallery';
 import ImageView from './pages/ImageView';
 import ApiDocs from './pages/ApiDocs';
+import Clients from './pages/Clients';
+import ClientGallery from './pages/ClientGallery';
 import './index.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -60,6 +62,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <ApiDocs />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/clients"
+            element={
+              <ProtectedRoute>
+                <Clients />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/clients/:clientId/gallery"
+            element={
+              <ProtectedRoute>
+                <ClientGallery />
               </ProtectedRoute>
             }
           />

@@ -22,6 +22,20 @@ class Image(models.Model):
         ordering = ['-uploaded_at']
         verbose_name = "Image"
         verbose_name_plural = "Images"
+        indexes = [
+            # Index for client_id filtering (most common filter)
+            models.Index(fields=['client_id'], name='idx_image_client_id'),
+            # Index for date-based sorting and filtering
+            models.Index(fields=['-uploaded_at'], name='idx_image_uploaded_desc'),
+            models.Index(fields=['uploaded_at'], name='idx_image_uploaded_asc'),
+            # Index for size sorting
+            models.Index(fields=['size'], name='idx_image_size'),
+            models.Index(fields=['-size'], name='idx_image_size_desc'),
+            # Composite index for client + date (common query pattern)
+            models.Index(fields=['client_id', '-uploaded_at'], name='idx_image_client_date'),
+            # Index for filename lookups
+            models.Index(fields=['filename'], name='idx_image_filename'),
+        ]
     
     def __str__(self):
         return self.name if self.name else self.filename

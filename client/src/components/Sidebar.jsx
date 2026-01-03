@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { MdHistory, MdPhotoLibrary, MdLogout, MdUpload, MdClose, MdCode } from 'react-icons/md';
+import { MdHistory, MdPhotoLibrary, MdLogout, MdUpload, MdClose, MdCode, MdPeople } from 'react-icons/md';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
@@ -93,6 +93,19 @@ const Sidebar = ({ isOpen, onClose }) => {
             >
               <MdPhotoLibrary className="text-xl" />
               <p className="text-sm font-medium leading-normal">Gallery</p>
+            </Link>
+            
+            <Link 
+              to="/clients"
+              onClick={handleNavClick}
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
+                isActive('/clients')
+                  ? 'bg-primary/20 text-primary neon-glow'
+                  : 'text-text-secondary hover:bg-card/50 hover:text-primary'
+              }`}
+            >
+              <MdPeople className="text-xl" />
+              <p className="text-sm font-medium leading-normal">Clients</p>
             </Link>
             
             <Link 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
@@ -8,15 +8,16 @@ import { useImages, useDeleteImage } from '../hooks/useImages';
 
 const Gallery = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
-  const [clientIdFilter, setClientIdFilter] = useState('');
+  const [clientIdFilter, setClientIdFilter] = useState(searchParams.get('client_id') || '');
   const [sortBy, setSortBy] = useState('-uploaded_at');
   const [page, setPage] = useState(1);
   const [pageSize] = useState(20);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [imageToDelete, setImageToDelete] = useState(null);
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(!!searchParams.get('client_id'));
 
   // Build query params
   const queryParams = {

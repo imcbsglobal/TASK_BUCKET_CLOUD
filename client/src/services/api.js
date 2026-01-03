@@ -70,6 +70,33 @@ export const imageService = {
     return response.data;
   },
 
+  // Bulk delete multiple images by IDs
+  bulkDeleteImages: async (imageIds) => {
+    const response = await api.post('/bulk-delete/', {
+      image_ids: imageIds,
+    });
+    return response.data;
+  },
+
+  // Delete all images for a client
+  deleteAllByClient: async (clientId) => {
+    const response = await api.delete(`/clients/${encodeURIComponent(clientId)}/delete-all/`);
+    return response.data;
+  },
+
+  // List all clients with counts
+  listClients: async (params = {}) => {
+    const queryParams = new URLSearchParams();
+    if (params.search) queryParams.append('search', params.search);
+    if (params.sort_by) queryParams.append('sort_by', params.sort_by);
+    if (params.page) queryParams.append('page', params.page);
+    if (params.page_size) queryParams.append('page_size', params.page_size);
+    
+    const url = `/clients/${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+    const response = await api.get(url);
+    return response.data;
+  },
+
   // Validate client ID
   validateClientId: async (clientId) => {
     const response = await api.post('/validate-client/', {
