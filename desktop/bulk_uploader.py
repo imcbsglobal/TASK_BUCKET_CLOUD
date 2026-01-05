@@ -59,7 +59,6 @@ class BulkImageUploader:
         self.client_id_valid = False
         self.file_field_name = tk.StringVar(value="image")
         self.max_workers = tk.IntVar(value=5)
-        self.output_format = tk.StringVar(value="csv")  # Default to CSV
         self.is_uploading = False
         self.is_paused = False
         self.success_count = 0
@@ -212,31 +211,6 @@ class BulkImageUploader:
         )
         select_btn.pack(side=tk.LEFT)
         
-        # Output Format Selection Section
-        format_frame = ttk.LabelFrame(main_frame, text="Output Format", padding="20")
-        format_frame.grid(row=3, column=0, columnspan=5, sticky=(tk.W, tk.E), pady=(0, 10))
-        
-        format_row = ttk.Frame(format_frame)
-        format_row.pack(fill=tk.X)
-        
-        ttk.Label(format_row, text="Select output file format:", font=("Segoe UI", 10, "bold")).pack(side=tk.LEFT, padx=(0, 15))
-        
-        csv_radio = ttk.Radiobutton(
-            format_row,
-            text="CSV (Recommended)",
-            variable=self.output_format,
-            value="csv"
-        )
-        csv_radio.pack(side=tk.LEFT, padx=(0, 15))
-        
-        xls_radio = ttk.Radiobutton(
-            format_row,
-            text="Excel (.xlsx)",
-            variable=self.output_format,
-            value="xlsx"
-        )
-        xls_radio.pack(side=tk.LEFT)
-        
         # Control Buttons Section
         control_frame = tk.Frame(main_frame, bg=self.colors['bg'])
         control_frame.grid(row=4, column=0, columnspan=5, pady=(0, 20))
@@ -377,7 +351,7 @@ class BulkImageUploader:
         
         footer_label = tk.Label(
             footer_frame,
-            text="Professional Upload System v2.0",
+            text="Professional Upload System v3.1",
             font=("Segoe UI", 8),
             fg=self.colors['light_gray'],
             bg=self.colors['bg']
@@ -987,23 +961,16 @@ class BulkImageUploader:
             return image_path
     
     def save_updated_file(self, df):
-        """Save the updated DataFrame to CSV or Excel file (only serial_number and image_path columns)"""
+        """Save the updated DataFrame to CSV file (only serial_number and image_path columns)"""
         try:
             original_path = Path(self.excel_file_path.get())
-            output_format = self.output_format.get()
             
-            if output_format == "csv":
-                new_filename = f"{original_path.stem}_results.csv"
-                new_path = original_path.parent / new_filename
-                self.log_message(f"Saving results to: {new_path}", "INFO")
-                df.to_csv(new_path, index=False, encoding='utf-8-sig')
-                self.log_message("✓ CSV file saved successfully", "SUCCESS")
-            else:  # xlsx
-                new_filename = f"{original_path.stem}_results.xlsx"
-                new_path = original_path.parent / new_filename
-                self.log_message(f"Saving results to: {new_path}", "INFO")
-                df.to_excel(new_path, index=False, engine='openpyxl')
-                self.log_message("✓ Excel file saved successfully", "SUCCESS")
+            # Always save as CSV
+            new_filename = f"{original_path.stem}_results.csv"
+            new_path = original_path.parent / new_filename
+            self.log_message(f"Saving results to: {new_path}", "INFO")
+            df.to_csv(new_path, index=False, encoding='utf-8-sig')
+            self.log_message("✓ CSV file saved successfully", "SUCCESS")
             
             self.log_message("=" * 80, "DEBUG")
             self.log_message(f"Output contains {len(df)} rows with columns: {list(df.columns)}", "INFO")
