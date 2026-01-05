@@ -17,6 +17,7 @@ class Image(models.Model):
     # Metadata
     size = models.IntegerField(help_text="File size in bytes")
     uploaded_at = models.DateTimeField(auto_now_add=True, help_text="Upload timestamp")
+    download_count = models.IntegerField(default=0, help_text="Number of times the image has been downloaded")
     
     class Meta:
         ordering = ['-uploaded_at']
