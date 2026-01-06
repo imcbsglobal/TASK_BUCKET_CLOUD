@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Toast from '../components/Toast';
@@ -16,6 +16,7 @@ const ClientGallery = () => {
   const { clientId } = useParams();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [sortBy, setSortBy] = useState('-uploaded_at');
   const [page, setPage] = useState(1);
   const [pageSize] = useState(24);
@@ -26,14 +27,22 @@ const ClientGallery = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [isSelecting, setIsSelecting] = useState(false);
 
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   // Build query params with client_id from URL
-  const queryParams = {
-    search: searchQuery,
+  const queryParams = useMemo(() => ({
+    search: debouncedSearch,
     client_id: clientId,
     sort_by: sortBy,
     page,
     page_size: pageSize
-  };
+  }), [debouncedSearch, clientId, sortBy, page, pageSize]);
 
   // React Query hooks
   const { data, isLoading: loading } = useImages(queryParams);
@@ -42,30 +51,32 @@ const ClientGallery = () => {
   const images = data?.images || [];
   const pagination = data?.pagination || {};
 
-  // Calculate stats for this client
+  // Calculate stats for this client (memoized)
   const totalImages = pagination.total_count || 0;
-  const totalSize = images.reduce((sum, img) => sum + (img.size || 0), 0);
+  const totalSize = useMemo(() => 
+    images.reduce((sum, img) => sum + (img.size || 0), 0)
+  , [images]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
-  }, [searchQuery, sortBy]);
+  }, [debouncedSearch, sortBy]);
 
   // Clear selections when changing pages or filters
   useEffect(() => {
     setSelectedImages([]);
-  }, [page, searchQuery, sortBy]);
+  }, [page, debouncedSearch, sortBy]);
 
-  const copyToClipboard = (url) => {
+  const copyToClipboard = useCallback((url) => {
     navigator.clipboard.writeText(url);
     setMessage({ type: 'success', text: 'URL copied to clipboard!' });
     setTimeout(() => setMessage({ type: '', text: '' }), 2000);
-  };
+  }, []);
 
-  const handleDeleteClick = (imageId) => {
+  const handleDeleteClick = useCallback((imageId) => {
     setImageToDelete(imageId);
     setShowDeleteModal(true);
-  };
+  }, []);
 
   const handleDeleteConfirm = async () => {
     if (!imageToDelete) return;
@@ -82,27 +93,27 @@ const ClientGallery = () => {
     }
   };
 
-  const toggleImageSelection = (imageId) => {
+  const toggleImageSelection = useCallback((imageId) => {
     setSelectedImages(prev => 
       prev.includes(imageId) 
         ? prev.filter(id => id !== imageId)
         : [...prev, imageId]
     );
-  };
+  }, []);
 
-  const toggleSelectAll = () => {
+  const toggleSelectAll = useCallback(() => {
     if (selectedImages.length === images.length) {
       setSelectedImages([]);
     } else {
       setSelectedImages(images.map(img => img.id));
     }
-  };
+  }, [selectedImages.length, images]);
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = useCallback(() => {
     if (selectedImages.length === 0) return;
     setImageToDelete(selectedImages);
     setShowDeleteModal(true);
-  };
+  }, [selectedImages]);
 
   const handleBulkDeleteConfirm = async () => {
     if (!imageToDelete) return;
@@ -313,8 +324,9 @@ const ClientGallery = () => {
 
         {/* Gallery Grid */}
         {loading ? (
-          <div className="flex items-center justify-center h-64">
+          <div className="flex flex-col items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-neon"></div>
+            <p className="text-text-secondary mt-4">Loading images...</p>
           </div>
         ) : images.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-text-secondary bg-card border border-purple-neon/20 rounded-lg">
@@ -376,6 +388,8 @@ const ClientGallery = () => {
                             alt={image.name || image.filename}
                             className="w-full h-full object-cover"
                             loading="lazy"
+                            decoding="async"
+                            style={{ contentVisibility: 'auto' }}
                           />
                           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <MdImage className="text-white text-xl" />
@@ -510,6 +524,8 @@ const ClientGallery = () => {
                         alt={image.name || image.filename}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
+                        decoding="async"
+                        style={{ contentVisibility: 'auto' }}
                       />
                       {/* Overlay on hover */}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">

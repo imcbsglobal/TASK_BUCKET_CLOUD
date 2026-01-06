@@ -1,0 +1,60 @@
+/* Performance Optimizations */
+
+/* Enable GPU acceleration for transforms and opacity */
+.group,
+.transition-all,
+.transition-transform,
+.transition-opacity {
+  will-change: auto;
+}
+
+/* Contain layout changes within elements */
+.bg-card,
+.rounded-lg,
+.rounded-xl {
+  contain: layout style paint;
+}
+
+/* Optimize image rendering */
+img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Reduce repaints for fixed/absolute elements */
+.absolute,
+.fixed {
+  contain: layout;
+}
+
+/* Optimize grid layouts */
+.grid {
+  contain: layout;
+}
+
+/* Enable hardware acceleration for hover effects */
+.hover\:scale-105:hover,
+.group-hover\:scale-105 {
+  transform: scale(1.05);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Optimize scrolling performance */
+body,
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Reduce paint areas */
+.overflow-hidden {
+  contain: paint;
+}
+
+/* Optimize backdrop blur */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  will-change: backdrop-filter;
+}

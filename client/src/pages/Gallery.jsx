@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Toast from '../components/Toast';
@@ -14,6 +14,7 @@ const Gallery = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [clientIdFilter, setClientIdFilter] = useState(searchParams.get('client_id') || '');
   const [sortBy, setSortBy] = useState('-uploaded_at');
   const [page, setPage] = useState(1);
@@ -25,14 +26,22 @@ const Gallery = () => {
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'grid'
   const [selectedImages, setSelectedImages] = useState([]);
 
-  // Build query params
-  const queryParams = {
-    search: searchQuery,
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Build query params (memoized)
+  const queryParams = useMemo(() => ({
+    search: debouncedSearch,
     client_id: clientIdFilter,
     sort_by: sortBy,
     page,
     page_size: pageSize
-  };
+  }), [debouncedSearch, clientIdFilter, sortBy, page, pageSize]);
 
   // React Query hooks
   const { data, isLoading: loading } = useImages(queryParams);
@@ -45,23 +54,23 @@ const Gallery = () => {
   // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
-  }, [searchQuery, clientIdFilter, sortBy]);
+  }, [debouncedSearch, clientIdFilter, sortBy]);
 
   // Clear selections when changing pages or filters
   useEffect(() => {
     setSelectedImages([]);
-  }, [page, searchQuery, clientIdFilter, sortBy]);
+  }, [page, debouncedSearch, clientIdFilter, sortBy]);
 
-  const copyToClipboard = (url) => {
+  const copyToClipboard = useCallback((url) => {
     navigator.clipboard.writeText(url);
     setMessage({ type: 'success', text: 'URL copied to clipboard!' });
     setTimeout(() => setMessage({ type: '', text: '' }), 2000);
-  };
+  }, []);
 
-  const handleDeleteClick = (imageId) => {
+  const handleDeleteClick = useCallback((imageId) => {
     setImageToDelete(imageId);
     setShowDeleteModal(true);
-  };
+  }, []);
 
   const handleDeleteConfirm = async () => {
     if (!imageToDelete) return;
@@ -91,27 +100,27 @@ const Gallery = () => {
     }
   };
 
-  const toggleImageSelection = (imageId) => {
+  const toggleImageSelection = useCallback((imageId) => {
     setSelectedImages(prev => 
       prev.includes(imageId) 
         ? prev.filter(id => id !== imageId)
         : [...prev, imageId]
     );
-  };
+  }, []);
 
-  const toggleSelectAll = () => {
+  const toggleSelectAll = useCallback(() => {
     if (selectedImages.length === images.length) {
       setSelectedImages([]);
     } else {
       setSelectedImages(images.map(img => img.id));
     }
-  };
+  }, [selectedImages.length, images]);
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = useCallback(() => {
     if (selectedImages.length === 0) return;
     setImageToDelete(selectedImages);
     setShowDeleteModal(true);
-  };
+  }, [selectedImages]);
 
   const formatSize = (bytes) => {
     if (bytes < 1024) return bytes + ' B';
@@ -289,8 +298,9 @@ const Gallery = () => {
         )}
 
         {loading ? (
-          <div className="text-center py-12 text-text-secondary">
-            Loading images...
+          <div className="flex flex-col items-center justify-center py-12 text-text-secondary">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-neon mb-4"></div>
+            <p>Loading images...</p>
           </div>
         ) : filteredImages.length === 0 ? (
           <div className="text-center py-12 text-text-secondary">
@@ -344,6 +354,8 @@ const Gallery = () => {
                             alt={image.name || image.original_filename}
                             className="w-full h-full object-cover"
                             loading="lazy"
+                            decoding="async"
+                            style={{ contentVisibility: 'auto' }}
                           />
                           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <MdImage className="text-white text-xl" />
@@ -469,10 +481,15 @@ const Gallery = () => {
                     }`}
                     onClick={() => navigate(`/image/${image.id}`)}
                   >
-                    <div
-                      className="aspect-square bg-cover bg-center relative"
-                      style={{ backgroundImage: `url("${image.url}")` }}
-                    >
+                    <div className="aspect-square relative overflow-hidden">
+                      <img
+                        src={image.url}
+                        alt={image.name || image.original_filename}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
+                        style={{ contentVisibility: 'auto' }}
+                      />
                       {/* Checkbox */}
                       <div className="absolute top-2 left-2 z-10">
                         <input
