@@ -5,13 +5,39 @@ A Windows desktop application built with Python and Tkinter for batch uploading 
 ---
 ## 📦 Build Executable
 
-Build a standalone Windows executable using PyInstaller:
+### Option 1: Build Locally
+
+**Important:** PyInstaller creates executables for your current OS only:
+- Build on **Windows** → Get `.exe` file
+- Build on **Linux** → Get Linux binary (no extension)
+- Build on **macOS** → Get macOS binary
 
 ```bash
+# Install PyInstaller first
+pip install pyinstaller
+
+# Build executable
 pyinstaller --onefile --windowed --name "IMC_Bulk_Image_Uploader" --hidden-import=PIL._tkinter_finder bulk_uploader.py
 ```
 
 The executable will be created in the `dist/` folder and can be run without Python installed.
+
+### Option 2: Automated Builds with GitHub Actions
+
+The project includes a GitHub Actions workflow that automatically builds executables for **Windows**, **Linux**, and **macOS**.
+
+**Trigger builds:**
+1. **Push to main/master** - Builds are created automatically
+2. **Manual trigger** - Go to Actions tab → "Build Desktop Executable" → Run workflow
+3. **Create a release** - Executables are automatically attached to the release
+
+**Download built executables:**
+- Go to the **Actions** tab in your GitHub repository
+- Select the latest workflow run
+- Download artifacts:
+  - `IMC_Bulk_Image_Uploader-Windows.exe`
+  - `IMC_Bulk_Image_Uploader-Linux`
+  - `IMC_Bulk_Image_Uploader-macOS`
 
 ---
 
