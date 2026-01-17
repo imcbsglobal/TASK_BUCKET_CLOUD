@@ -435,7 +435,8 @@ class BulkImageUploader:
                 response = requests.get(CLIENT_ID_API_URL, timeout=10)
                 response.raise_for_status()
                 data = response.json()
-                valid_ids = data.get('client_ids', [])
+                # Extract client_ids from the data array
+                valid_ids = [item.get('client_id', '') for item in data.get('data', [])]
                 
                 if client_id in [vid.upper() for vid in valid_ids]:
                     self.root.after(0, lambda: self.client_id_status_label.config(
