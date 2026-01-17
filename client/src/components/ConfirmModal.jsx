@@ -1,6 +1,15 @@
 import { MdClose, MdWarning } from 'react-icons/md';
 
-const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText = 'Delete', cancelText = 'Cancel' }) => {
+const ConfirmModal = ({ 
+  isOpen, 
+  onClose, 
+  onConfirm, 
+  title, 
+  message, 
+  confirmText = 'Delete', 
+  cancelText = 'Cancel',
+  disabled = false 
+}) => {
   if (!isOpen) return null;
 
   return (
@@ -18,7 +27,8 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText 
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 sm:p-2 rounded-lg hover:bg-purple-neon/10 text-text-secondary hover:text-text-primary transition-all"
+            disabled={disabled}
+            className="p-1.5 sm:p-2 rounded-lg hover:bg-purple-neon/10 text-text-secondary hover:text-text-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <MdClose className="text-xl sm:text-2xl" />
           </button>
@@ -26,25 +36,26 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText 
 
         {/* Body */}
         <div className="p-4 sm:p-6">
-          <p className="text-text-secondary leading-relaxed text-sm sm:text-base">
+          <div className="text-text-secondary leading-relaxed text-sm sm:text-base">
             {message}
-          </p>
+          </div>
         </div>
 
         {/* Footer */}
         <div className="flex items-center justify-end gap-2 sm:gap-3 p-4 sm:p-6 border-t border-purple-neon/20 bg-background/50">
           <button
             onClick={onClose}
-            className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-card border border-purple-neon/30 text-text-primary hover:bg-purple-neon/10 transition-all font-medium text-sm sm:text-base"
+            disabled={disabled}
+            className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-card border border-purple-neon/30 text-text-primary hover:bg-purple-neon/10 transition-all font-medium text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {cancelText}
           </button>
           <button
             onClick={() => {
               onConfirm();
-              onClose();
             }}
-            className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-all font-medium shadow-lg hover:shadow-red-500/50 text-sm sm:text-base"
+            disabled={disabled}
+            className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-all font-medium shadow-lg hover:shadow-red-500/50 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-500"
           >
             {confirmText}
           </button>

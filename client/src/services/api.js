@@ -80,7 +80,9 @@ export const imageService = {
 
   // Delete all images for a client
   deleteAllByClient: async (clientId) => {
-    const response = await api.delete(`/clients/${encodeURIComponent(clientId)}/delete-all/`);
+    const response = await api.delete(`/clients/${encodeURIComponent(clientId)}/delete-all/`, {
+      timeout: 300000, // 5 minutes timeout for bulk operations
+    });
     return response.data;
   },
 

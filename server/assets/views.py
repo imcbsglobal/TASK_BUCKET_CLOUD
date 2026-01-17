@@ -4,10 +4,25 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-from .models import Image
+from .models import Image, PendingFileDeletion
 from .utils.client_validator import validate_client_id
 import uuid
 import os
+
+
+def queue_file_for_deletion(file_path, client_id=None):
+    """
+    Queue a file for deferred deletion.
+    Returns immediately without actually deleting the file.
+    """
+    try:
+        PendingFileDeletion.objects.create(
+            file_path=file_path,
+            client_id=client_id
+        )
+    except Exception as e:
+        # Log error but don't fail the operation
+        print(f"Warning: Failed to queue file for deletion: {e}")
 
 
 @csrf_exempt
@@ -379,10 +394,11 @@ def validate_client(request):
 @require_http_methods(["DELETE"])
 def delete_image(request, image_id):
     """
-    Delete an image from the database and Cloudflare R2 storage.
+    Delete an image from the database instantly.
+    File deletion is queued for background processing.
     
     Expected: DELETE request with image_id in URL
-    Returns: JSON with success status
+    Returns: JSON with success status (instant response)
     """
     try:
         # Get the image from database
@@ -394,16 +410,11 @@ def delete_image(request, image_id):
                 'error': f'Image with id {image_id} not found.'
             }, status=404)
         
-        # Delete file from storage
+        # Queue file for deletion (if exists)
         if image_obj.image:
-            try:
-                if default_storage.exists(image_obj.image.name):
-                    default_storage.delete(image_obj.image.name)
-            except Exception as storage_error:
-                # Continue with DB deletion even if storage deletion fails
-                print(f"Warning: Could not delete file from storage: {storage_error}")
+            queue_file_for_deletion(image_obj.image.name, image_obj.client_id)
         
-        # Delete from database
+        # Delete from database immediately
         image_obj.delete()
         
         return JsonResponse({
@@ -423,9 +434,10 @@ def delete_image(request, image_id):
 def bulk_delete_images(request):
     """
     Bulk delete multiple images by their IDs.
+    Metadata deleted instantly, files queued for background deletion.
     
     Expected: POST request with JSON body containing 'image_ids' (array of integers)
-    Returns: JSON with count of deleted images and any failures
+    Returns: JSON with count of deleted images (instant response)
     """
     try:
         import json
@@ -454,43 +466,38 @@ def bulk_delete_images(request):
                 'error': 'All image_ids must be valid integers.'
             }, status=400)
         
-        # Fetch images to delete - use only() for efficiency
-        images_to_delete = Image.objects.filter(id__in=image_ids).only('id', 'image')
+        # Fetch images to delete - use only() and values() for efficiency
+        images_to_delete = Image.objects.filter(id__in=image_ids).only('id', 'image', 'client_id')
         found_ids = set(images_to_delete.values_list('id', flat=True))
         not_found_ids = set(image_ids) - found_ids
         
-        deleted_count = 0
-        storage_errors = []
+        # Bulk create queue entries (FAST - single SQL operation)
+        pending_deletions = []
+        for image_obj in images_to_delete.values('image', 'client_id'):
+            if image_obj['image']:
+                pending_deletions.append(
+                    PendingFileDeletion(
+                        file_path=image_obj['image'],
+                        client_id=image_obj['client_id']
+                    )
+                )
         
-        # Delete files from storage
-        for image_obj in images_to_delete:
-            if image_obj.image:
-                try:
-                    if default_storage.exists(image_obj.image.name):
-                        default_storage.delete(image_obj.image.name)
-                except Exception as storage_error:
-                    storage_errors.append({
-                        'id': image_obj.id,
-                        'error': str(storage_error)
-                    })
+        # Bulk insert all at once
+        if pending_deletions:
+            PendingFileDeletion.objects.bulk_create(pending_deletions, batch_size=1000)
         
-        # Bulk delete from database
-        deleted_count = images_to_delete.delete()[0]
+        # Bulk delete from database immediately
+        deleted_count, _ = images_to_delete.delete()
         
         response_data = {
             'success': True,
             'deleted_count': deleted_count,
             'requested_count': len(image_ids),
+            'message': f'Successfully deleted {deleted_count} images. Files will be cleaned up in background.'
         }
         
         if not_found_ids:
             response_data['not_found_ids'] = list(not_found_ids)
-        
-        if storage_errors:
-            response_data['storage_errors'] = storage_errors
-            response_data['message'] = f'Deleted {deleted_count} images. Some storage deletions failed.'
-        else:
-            response_data['message'] = f'Successfully deleted {deleted_count} images.'
         
         return JsonResponse(response_data, status=200)
         
@@ -505,10 +512,11 @@ def bulk_delete_images(request):
 @require_http_methods(["DELETE"])
 def bulk_delete_by_client(request, client_id):
     """
-    Delete all images for a specific client_id.
+    Delete all images for a specific client_id instantly.
+    Metadata deleted immediately, files queued for background cleanup.
     
     Expected: DELETE request with client_id in URL
-    Returns: JSON with count of deleted images
+    Returns: JSON with count of deleted images (instant response)
     """
     try:
         if not client_id:
@@ -518,7 +526,7 @@ def bulk_delete_by_client(request, client_id):
             }, status=400)
         
         # Find all images for this client - use only() for efficiency
-        images_to_delete = Image.objects.filter(client_id__iexact=client_id).only('id', 'image')
+        images_to_delete = Image.objects.filter(client_id__iexact=client_id).only('id', 'image', 'client_id')
         total_count = images_to_delete.count()
         
         if total_count == 0:
@@ -528,34 +536,33 @@ def bulk_delete_by_client(request, client_id):
                 'message': f'No images found for client_id: {client_id}'
             }, status=200)
         
-        storage_errors = []
+        # Bulk create queue entries (FAST - single SQL query with bulk_create)
+        pending_deletions = []
+        for image_obj in images_to_delete.values('image', 'client_id'):
+            if image_obj['image']:
+                pending_deletions.append(
+                    PendingFileDeletion(
+                        file_path=image_obj['image'],
+                        client_id=image_obj['client_id']
+                    )
+                )
         
-        # Delete files from storage
-        for image_obj in images_to_delete:
-            if image_obj.image:
-                try:
-                    if default_storage.exists(image_obj.image.name):
-                        default_storage.delete(image_obj.image.name)
-                except Exception as storage_error:
-                    storage_errors.append({
-                        'id': image_obj.id,
-                        'error': str(storage_error)
-                    })
+        # Bulk insert all at once (fast operation)
+        queued_count = 0
+        if pending_deletions:
+            PendingFileDeletion.objects.bulk_create(pending_deletions, batch_size=1000)
+            queued_count = len(pending_deletions)
         
-        # Bulk delete from database
-        deleted_count = images_to_delete.delete()[0]
+        # Bulk delete from database immediately (fast operation)
+        deleted_count, _ = images_to_delete.delete()
         
         response_data = {
             'success': True,
             'client_id': client_id,
             'deleted_count': deleted_count,
+            'files_queued': queued_count,
+            'message': f'Successfully deleted all {deleted_count} images for client {client_id}. {queued_count} files queued for background cleanup.'
         }
-        
-        if storage_errors:
-            response_data['storage_errors'] = storage_errors
-            response_data['message'] = f'Deleted {deleted_count} images for client {client_id}. Some storage deletions failed.'
-        else:
-            response_data['message'] = f'Successfully deleted all {deleted_count} images for client {client_id}.'
         
         return JsonResponse(response_data, status=200)
         
@@ -674,3 +681,127 @@ def list_clients(request):
             'success': False,
             'error': f'Failed to list clients: {str(e)}'
         }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def cleanup_pending_deletions(request):
+    """
+    Process queued file deletions in background.
+    Call this endpoint periodically (cron, scheduled task, or manually).
+    
+    Query parameters:
+    - batch_size: Number of files to process (default: 100, max: 1000)
+    - max_attempts: Skip files that have failed this many times (default: 3)
+    
+    Returns: JSON with cleanup statistics
+    """
+    try:
+        # Get parameters
+        batch_size = min(int(request.GET.get('batch_size', 100)), 1000)
+        max_attempts = int(request.GET.get('max_attempts', 3))
+        
+        # Get pending deletions
+        pending = PendingFileDeletion.objects.filter(
+            attempts__lt=max_attempts
+        ).order_by('queued_at')[:batch_size]
+        
+        total_processed = 0
+        success_count = 0
+        failed_count = 0
+        skipped_count = 0
+        
+        for item in pending:
+            total_processed += 1
+            
+            try:
+                # Try to delete the file
+                default_storage.delete(item.file_path)
+                # Success - remove from queue
+                item.delete()
+                success_count += 1
+                
+            except Exception as e:
+                # Failed - increment attempts and log error
+                item.attempts += 1
+                item.last_error = str(e)[:500]  # Truncate error
+                
+                # If max attempts reached, delete the queue entry (give up)
+                if item.attempts >= max_attempts:
+                    item.delete()
+                    skipped_count += 1
+                else:
+                    item.save()
+                    failed_count += 1
+        
+        # Get remaining queue size
+        remaining = PendingFileDeletion.objects.count()
+        
+        return JsonResponse({
+            'success': True,
+            'processed': total_processed,
+            'deleted': success_count,
+            'failed': failed_count,
+            'skipped': skipped_count,
+            'remaining_in_queue': remaining,
+            'message': f'Processed {total_processed} files: {success_count} deleted, {failed_count} failed, {skipped_count} skipped'
+        }, status=200)
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Cleanup failed: {str(e)}'
+        }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_deletion_queue_stats(request):
+    """
+    Get statistics about the pending deletion queue.
+    
+    Returns: JSON with queue statistics
+    """
+    try:
+        from django.db.models import Count, Min, Max
+        
+        total_pending = PendingFileDeletion.objects.count()
+        
+        if total_pending == 0:
+            return JsonResponse({
+                'success': True,
+                'stats': {
+                    'total_pending': 0,
+                    'oldest_queued': None,
+                    'newest_queued': None,
+                    'by_attempts': []
+                }
+            }, status=200)
+        
+        # Aggregate by attempt count
+        by_attempts = list(
+            PendingFileDeletion.objects.values('attempts')
+            .annotate(count=Count('id'))
+            .order_by('attempts')
+        )
+        
+        # Get oldest and newest
+        oldest = PendingFileDeletion.objects.order_by('queued_at').first()
+        newest = PendingFileDeletion.objects.order_by('-queued_at').first()
+        
+        return JsonResponse({
+            'success': True,
+            'stats': {
+                'total_pending': total_pending,
+                'oldest_queued': oldest.queued_at.isoformat() if oldest else None,
+                'newest_queued': newest.queued_at.isoformat() if newest else None,
+                'by_attempts': by_attempts
+            }
+        }, status=200)
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Failed to get queue stats: {str(e)}'
+        }, status=500)
+

@@ -191,6 +191,10 @@ IMAGE_MAX_UPLOAD_MB = float(os.getenv('IMAGE_MAX_UPLOAD_MB', '1'))  # default 1 
 IMAGE_COMPRESSION_QUALITY = int(os.getenv('IMAGE_COMPRESSION_QUALITY', '80'))
 IMAGE_COMPRESSION_MIN_QUALITY = int(os.getenv('IMAGE_COMPRESSION_MIN_QUALITY', '45'))
 
+# Request timeout settings for long-running operations
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+
 # API Authentication
 # Hardcoded API key for basic authentication
 API_KEY = 'imcbs-secret-key-2025'

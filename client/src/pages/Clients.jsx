@@ -39,6 +39,7 @@ const Clients = () => {
   
   // Delete modal
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, client: null });
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Toast
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -159,18 +160,22 @@ const Clients = () => {
   const confirmDelete = async () => {
     if (!deleteModal.client) return;
     
+    setIsDeleting(true);
     try {
+      showToast('Deleting images... This may take a few minutes for large collections.', 'info');
       const response = await imageService.deleteAllByClient(deleteModal.client.client_id);
       if (response.success) {
-        showToast(`Deleted ${response.deleted_count} images for ${deleteModal.client.client_id}`, 'success');
+        showToast(`Successfully deleted ${response.deleted_count} images for ${deleteModal.client.client_id}`, 'success');
         fetchClients();
       } else {
         showToast(response.error || 'Delete failed', 'error');
       }
     } catch (error) {
       console.error('Delete failed:', error);
-      showToast('Failed to delete client images', 'error');
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to delete client images';
+      showToast(errorMsg, 'error');
     } finally {
+      setIsDeleting(false);
       setDeleteModal({ isOpen: false, client: null });
     }
   };
@@ -477,7 +482,7 @@ const Clients = () => {
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={deleteModal.isOpen}
-        onClose={() => setDeleteModal({ isOpen: false, client: null })}
+        onClose={() => !isDeleting && setDeleteModal({ isOpen: false, client: null })}
         onConfirm={confirmDelete}
         title="Delete All Client Images"
         message={
@@ -494,11 +499,18 @@ const Clients = () => {
               <p className="text-text-secondary text-sm">
                 This will free up {formatBytes(deleteModal.client.total_size)} of storage.
               </p>
+              {isDeleting && (
+                <p className="text-purple-neon text-sm font-semibold flex items-center gap-2 mt-3">
+                  <MdRefresh className="animate-spin" />
+                  Deleting... This may take a few minutes for large collections.
+                </p>
+              )}
             </div>
           ) : ''
         }
-        confirmText="Delete All"
+        confirmText={isDeleting ? "Deleting..." : "Delete All"}
         confirmColor="error"
+        disabled={isDeleting}
       />
 
       {/* Toast Notification */}
