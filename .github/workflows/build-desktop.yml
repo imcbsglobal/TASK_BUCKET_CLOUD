@@ -6,6 +6,8 @@ on:
     paths:
       - 'desktop/**'
     tags:
+      - 'v*'
+      - 'v*.*'
       - 'v*.*.*'
   pull_request:
     branches: [ main, master ]
