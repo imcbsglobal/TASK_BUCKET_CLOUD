@@ -121,10 +121,9 @@ jobs:
         path: desktop/dist/IMC_Bulk_Image_Uploader
         retention-days: 30
     
-    - name: Upload to Release (if release event)
-      if: github.event_name == 'retag)
+    - name: Upload to Release (if tag)
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v2
       with:
         files: desktop/dist/IMC_Bulk_Image_Uploader
-        token
+        token: ${{ secrets.GITHUB_TOKEN }}
